@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 
-(A,B)=loader.load()
+(A,B)=loader.loadTrainingSet()
 print 'success'
 imgplot = plt.imshow(A)
 plt.show()
