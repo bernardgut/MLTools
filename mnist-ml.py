@@ -17,3 +17,6 @@ print 'success'
 #split data
 (T,V)=splitter.split(A)
 print T.shape,' ',V.shape
+
+x = [[1, 2, 10 ,1 ,2],[ 1,2,12,0,10]]
+print np.amax(x)
