@@ -13,14 +13,17 @@ print 'success'
 #plt.show()
 #np.reshape(A, A.size)
 
-#split data
-(T,V)=splitter.split(A)
-print 'Training.training : ', T.shape,'; Training.validation : ',V.shape
 #min max
-max = np.amax(T)
-min = np.amin(T)
+max = np.amax(A)
+min = np.amin(A)
 #normalize
-J = min*np.ones(T.shape)
-N = (T-J)/(max-min)
+J = min*np.ones(A.shape)
+N = (A-J)/(max-min)
+
+#split data
+(T,V)=splitter.split(N)
+print 'Training.training : ', T.shape,'; Training.validation : ',V.shape, ' ; writing to disk...'
+np.save('mnist/nTrainingSet',T)
+np.save('mnist/nValidationSet',V)
 
 
