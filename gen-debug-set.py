@@ -9,7 +9,7 @@ for i in range(0,50) :
 	y[i] = newimg.reshape(1,144)
 print "reshape finished"
 
-np.save('debugTestSet',y)
+np.save('mnist/debugTestSet',y)
 
 
 
