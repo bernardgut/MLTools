@@ -58,9 +58,9 @@ def backwardPass(A,Ti) :
 #of hidden nodes
 h1 = 2
 #step size
-rho = 0.1
+rho = 1
 #momentum factor
-mu = 0.5
+mu = 0
 
 #load data
 #X1=np.load('mnist/nTrainingSet.npy')
@@ -77,6 +77,7 @@ print 'Training set X1: ', X1.shape,' ; Valitation set X2: ', X2.shape, ' ; labe
 d = X1.shape[1]
 
 #TODO : generate with correct variance
+#TODO : early stopping
 #Generate initial weights layer 1
 W1_odd = np.random.normal(0,1.0,(h1,d))
 W1_even = np.random.normal(0,1.0,(h1,d))
@@ -95,7 +96,7 @@ T_t = np.multiply(T_t,0.5)
 
 DELTA_Wkminone = [0, 0, 0, 0, 0, 0]
 DELTA_Wk = [0, 0, 0, 0, 0, 0]
-for x in range(1,1000) :
+for x in range(1,100) :
     i = 0
     print '=========================================================='
     for Xi in X1 : 
