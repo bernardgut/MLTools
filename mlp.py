@@ -42,37 +42,38 @@ def mlp_train(X1, T1) :
     #correction at iteration k
     DW_k = [0, 0, 0, 0, 0, 0]
     
-    for x in range(1,100) :
-        i = 0
-        print '=========================================================='
-        for i in range(0,X1.shape[0]) : 
-            xi = np.matrix(X1[i])
-            #Forward pass, A - activators :[A1_odd, A1_even, A2]
-            A = forwardPass(xi,W)
-            print 'Label t for Xi : ',  T_t[i]
-            print 'a2 for given point :', A[2]
-            #display error for current point
-            E_log = getError(A[2],  T_t[i])
-            print 'Logistic Error for given point : ',E_log
+    i = 0
+    
+    for i in range(0,X1.shape[0]) :
+        print '==========================================================' 
+        xi = np.matrix(X1[i])
+        #Forward pass, A - activators :[A1_odd, A1_even, A2]
+        A = forwardPass(xi,W)
+        print 'descision for : ', xi
+        print 'Label t for Xi : ',  T_t[i]
+        print 'a2 for given point :', A[2]
+        #display error for current point
+        E_log = getError(A[2],  T_t[i])
+        print 'Logistic Error for given point : ',E_log
 
-            #Backward pass GRAD : Residues : [dwo1_Ei, dwe1_Ei, R1_odd, R1_even, dw2_Ei, R2]  
-            GRAD = backwardPass(A, W[4], xi, T_t[i])
-            
-            #Gradient descent
-            DW_k[0] = np.add(-np.multiply(rho*(1-mu), GRAD[0]),np.multiply(mu,DW_kminone[0]))
-            DW_k[1] = np.add(-np.multiply(rho*(1-mu), GRAD[1]),np.multiply(mu,DW_kminone[1]))
-            DW_k[2] = np.add(-np.multiply(rho*(1-mu), GRAD[2]),np.multiply(mu,DW_kminone[2]))
-            DW_k[3] = np.add(-np.multiply(rho*(1-mu), GRAD[3]),np.multiply(mu,DW_kminone[3]))
-            DW_k[4] = np.add(-np.multiply(rho*(1-mu), GRAD[4]),np.multiply(mu,DW_kminone[4]))
-            DW_k[5] = np.add(-np.multiply(rho*(1-mu), GRAD[5]),np.multiply(mu,DW_kminone[5]))
-            
-            #apply correction
-            W[0] = np.add(W[0], DW_k[0])
-            W[1] = np.add(W[1], DW_k[1])
-            W[2] = np.add(W[2], DW_k[2])
-            W[3] = np.add(W[3], DW_k[3])
-            W[4] = np.add(W[4], DW_k[4])
-            W[5] = np.add(W[5], DW_k[5])
+        #Backward pass GRAD : Residues : [dwo1_Ei, dwe1_Ei, R1_odd, R1_even, dw2_Ei, R2]  
+        GRAD = backwardPass(A, W[4], xi, T_t[i])
+        
+        #Gradient descent
+        DW_k[0] = np.add(-np.multiply(rho*(1-mu), GRAD[0]),np.multiply(mu,DW_kminone[0]))
+        DW_k[1] = np.add(-np.multiply(rho*(1-mu), GRAD[1]),np.multiply(mu,DW_kminone[1]))
+        DW_k[2] = np.add(-np.multiply(rho*(1-mu), GRAD[2]),np.multiply(mu,DW_kminone[2]))
+        DW_k[3] = np.add(-np.multiply(rho*(1-mu), GRAD[3]),np.multiply(mu,DW_kminone[3]))
+        DW_k[4] = np.add(-np.multiply(rho*(1-mu), GRAD[4]),np.multiply(mu,DW_kminone[4]))
+        DW_k[5] = np.add(-np.multiply(rho*(1-mu), GRAD[5]),np.multiply(mu,DW_kminone[5]))
+        
+        #apply correction
+        W[0] = np.add(W[0], DW_k[0])
+        W[1] = np.add(W[1], DW_k[1])
+        W[2] = np.add(W[2], DW_k[2])
+        W[3] = np.add(W[3], DW_k[3])
+        W[4] = np.add(W[4], DW_k[4])
+        W[5] = np.add(W[5], DW_k[5])
 
 #Logistic error for output a2 for a2.len datapoints and n2.len labels
 def getError(a2, labels) :
@@ -146,10 +147,10 @@ def backwardPass(A,W2,Xi,Ti) :
 #X1=np.load('mnist/nTrainingSet.npy')
 #X2=np.load('mnist/nValidationSet.npy')
 #T = np.load('mnist/labels.npy')
-X1 = np.array([[0,0], [0,1], [1,0],[1,1]])
-X2 = np.array([[1,0]])
-T1 = np.array([[-1], [1], [1], [-1]])
-T2 = np.array([1])
+X1 = np.load('mnist/n_XOR_Training.npy')
+X2 = np.load('mnist/n_XOR_Validation.npy')
+T1 = np.load('mnist/n_XOR_Training_labels.npy')
+T2 = np.load('mnist/n_XOR_Validation_labels.npy')
 print 'load success'
 print 'Training set X1: ', X1.shape,' ; Valitation set X2: ', X2.shape, ' ; labels set T1:', T1.shape, ' ; labels set T2:', T2.shape
 mlp_train(X1,T1)

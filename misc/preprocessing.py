@@ -25,7 +25,7 @@ N = (A-J)/(max-min)
 print T.shape
 print 'Training.training : ', T.shape, ' l : ',T_l.shape, ' ; Training.validation : ',V.shape, ' l : ', V_l.shape, '\n ; writing to disk...'
 
-np.save('../mnist/nTrainingSet',T)
-np.save('../mnist/nValidationSet',V)
-np.save('../mnist/nTrainingSet_labels',T_l)
-np.save('../mnist/nValidationSet_labels',V_l)
+np.save('../mnist/n_MNIST_Training',T)
+np.save('../mnist/n_MNIST_Validation',V)
+np.save('../mnist/n_MNIST_Training_labels',T_l)
+np.save('../mnist/n_MNIST_Validation_labels',V_l)
