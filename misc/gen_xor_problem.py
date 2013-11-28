@@ -7,7 +7,7 @@ import numpy as np
 random.seed()
 A = list()
 L = list()
-for i in range(0,10000) :
+for i in range(0,1000) :
     x = random.randint(-9,10)
     y = random.randint(-9,10)
     if (x>0  & y >0) :

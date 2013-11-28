@@ -7,30 +7,58 @@ import numpy as np
 
 ##############
 
-##PARAMETERS##
-#no of hidden nodes [1:inf]
-h1 = 2
-#step size [0:1]
-rho = 1
-#momentum factor [0:1]
-mu = 0
+##PROG PARAMETERS##
+_debug = 0
 
-##MAIN##
-def mlp_train(X1, T1) :
+##ALGO PARAMETERS##
+#no of hidden nodes [1:inf]
+h1 = 4
+#step size [0:1]
+rho = 0.1
+#momentum factor [0:1]
+mu = 0.1
+
+#validate
+def mlp_validation(X2, T2, W) :
+    #Labels adjustment
+    T_t = np.add(T1,1)
+    T_t = np.multiply(T_t,0.5)
+    
+    E = 0
+    if _debug : print '=====================validation for epoch======================='
+    for i in range(0,X2.shape[0]) :
+            xi = np.matrix(X2[i])
+            #Forward pass, A - activators :[A1_odd, A1_even, A2]
+            A = forwardPass(xi,W)
+            #display error for current point
+            E_log = getError(A[2],  T_t[i])
+            
+            if _debug :
+                print 'descision for : ', xi
+                print 'Label t for Xi : ',  T_t[i]
+                print 'a2 for given point :', A[2]
+                print 'Logistic Error for given point : ',E_log
+            
+            E = E + E_log
+    return E
+            
+##train##
+def mlp_train(X1, T1, W=0) :
     #dimensionality
     d = X1.shape[1]
-    
-    #Generate initial weights layer 1
-    W1_odd = np.random.normal(0,1.0,(h1,d))
-    W1_even = np.random.normal(0,1.0,(h1,d))
-    B1_odd = np.random.normal(0,1.0,(h1,1))
-    B1_even = np.random.normal(0,1.0,(h1,1))
+    if W==0 : 
+        #Generate initial weights layer 1
+        W1_odd = np.random.normal(0,np.sqrt(1.0/d),(h1,d))
+        W1_even = np.random.normal(0,np.sqrt(1.0/d),(h1,d))
+        B1_odd = np.random.normal(0,np.sqrt(1.0/d),(h1,1))
+        B1_even = np.random.normal(0,np.sqrt(1.0/d),(h1,1))
+        
+        print 1.0/d
+        #Generate initial weights layer 2 
+        W2 = np.random.normal(0,1.0,(h1,1))
+        B2 = np.random.normal(0,1.0)
 
-    #Generate initial weights layer 2 
-    W2 = np.random.normal(0,1.0,(h1,1))
-    B2 = np.random.normal(0,1.0)
-
-    W = [W1_odd,W1_even,B1_odd,B1_even,W2,B2]
+        W = [W1_odd,W1_even,B1_odd,B1_even,W2,B2]
 
     #Labels adjustment
     T_t = np.add(T1,1)
@@ -41,21 +69,22 @@ def mlp_train(X1, T1) :
     DW_kminone = [0, 0, 0, 0, 0, 0]
     #correction at iteration k
     DW_k = [0, 0, 0, 0, 0, 0]
-    
-    i = 0
-    
+
+    #for epoch in range(0,1000) :
+    if _debug : print '======================train epoch=========================' 
     for i in range(0,X1.shape[0]) :
-        print '==========================================================' 
         xi = np.matrix(X1[i])
         #Forward pass, A - activators :[A1_odd, A1_even, A2]
         A = forwardPass(xi,W)
-        print 'descision for : ', xi
-        print 'Label t for Xi : ',  T_t[i]
-        print 'a2 for given point :', A[2]
         #display error for current point
         E_log = getError(A[2],  T_t[i])
-        print 'Logistic Error for given point : ',E_log
-
+        
+        if _debug :
+            print 'descision for : ', xi
+            print 'Label t for Xi : ',  T_t[i]
+            print 'a2 for given point :', A[2]
+            print 'Logistic Error for given point : ',E_log
+        
         #Backward pass GRAD : Residues : [dwo1_Ei, dwe1_Ei, R1_odd, R1_even, dw2_Ei, R2]  
         GRAD = backwardPass(A, W[4], xi, T_t[i])
         
@@ -74,6 +103,8 @@ def mlp_train(X1, T1) :
         W[3] = np.add(W[3], DW_k[3])
         W[4] = np.add(W[4], DW_k[4])
         W[5] = np.add(W[5], DW_k[5])
+    #end train phase for epoch
+    return W
 
 #Logistic error for output a2 for a2.len datapoints and n2.len labels
 def getError(a2, labels) :
@@ -145,12 +176,36 @@ def backwardPass(A,W2,Xi,Ti) :
 ###RUN SCRIPT###
 #load data
 #X1=np.load('mnist/nTrainingSet.npy')
+#T1=np.load('mnist/nTrainingSet_labels.npy')
 #X2=np.load('mnist/nValidationSet.npy')
 #T = np.load('mnist/labels.npy')
-X1 = np.load('mnist/n_XOR_Training.npy')
-X2 = np.load('mnist/n_XOR_Validation.npy')
-T1 = np.load('mnist/n_XOR_Training_labels.npy')
-T2 = np.load('mnist/n_XOR_Validation_labels.npy')
-print 'load success'
-print 'Training set X1: ', X1.shape,' ; Valitation set X2: ', X2.shape, ' ; labels set T1:', T1.shape, ' ; labels set T2:', T2.shape
-mlp_train(X1,T1)
+
+#xor problem big
+#X1 = np.load('mnist/n_XOR_Training.npy')
+#X2 = np.load('mnist/n_XOR_Validation.npy')
+#T1 = np.load('mnist/n_XOR_Training_labels.npy')
+#T2 = np.load('mnist/n_XOR_Validation_labels.npy')
+
+#xor proplem small
+X1 = np.array([[0,0],[1,0],[0,1],[1,1]])
+T1 = np.array([[-1],[1],[1],[-1]])
+X2 = np.array([[0,0],[1,0],[0,1],[1,1]])
+T2 = np.array([[-1],[1],[1],[-1]])
+#print 'load success'
+#print 'Training set X1: ', X1.shape,' ; Valitation set X2: '#, X2.shape, ' ; labels set T1:', T1.shape, ' ; labels set T2:', T2.shape
+
+W = 0
+Emin = 999999
+count = 0
+for epoch in range (0,10000) : 
+    W = mlp_train(X1,T1,W)
+    E = mlp_validation(X2,T2,W)
+    print 'epoch ',epoch,' , validation error E =',error
+    
+    #early stopping
+    if E>Emin : 
+        Wmin = W
+        count=count+1
+    else :
+        if count>0 : count = count-1
+    #convergence test
