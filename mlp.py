@@ -200,7 +200,7 @@ count = 0
 for epoch in range (0,10000) : 
     W = mlp_train(X1,T1,W)
     E = mlp_validation(X2,T2,W)
-    print 'epoch ',epoch,' , validation error E =',error
+    print 'epoch ',epoch,' , validation error E =', E
     
     #early stopping
     if E>Emin : 
