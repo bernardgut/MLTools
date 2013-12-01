@@ -70,7 +70,7 @@ def mlp_train(X1, T1, W=0) :
     DW_kminone = [0, 0, 0, 0, 0, 0]
     #correction at iteration k
     DW_k = [0, 0, 0, 0, 0, 0]
-
+    #max_error = 0
     #for epoch in range(0,1000) :
     if _debug : print '======================train epoch=========================' 
     for i in range(0,X1.shape[0]) :
@@ -88,7 +88,10 @@ def mlp_train(X1, T1, W=0) :
         
         #Backward pass GRAD : Residues : [dwo1_Ei, dwe1_Ei, R1_odd, R1_even, dw2_Ei, R2]  
         GRAD = backwardPass(A, W[4], xi, T_t[i])
-        
+        #error = test_gradient(GRAD, W, d, h1)
+       	#if error > max_error :
+		#	max_error = error
+
         #Gradient descent
         DW_k[0] = np.add(-np.multiply(rho*(1-mu), GRAD[0]),np.multiply(mu,DW_kminone[0]))
         DW_k[1] = np.add(-np.multiply(rho*(1-mu), GRAD[1]),np.multiply(mu,DW_kminone[1]))
@@ -105,6 +108,7 @@ def mlp_train(X1, T1, W=0) :
         W[4] = np.add(W[4], DW_k[4])
         W[5] = np.add(W[5], DW_k[5])
     #end train phase for epoch
+    #print 'Max error in gradient : ', max_error
     return W
 
 #reshuffle
