@@ -1,7 +1,7 @@
 import random
 import numpy as np
 
-def split(A, L) :
+def split(A, L, proportion=2.0/3.0) :
     random.seed()
     i=0
     j=0
@@ -9,13 +9,13 @@ def split(A, L) :
     V = list()
     T_l = list()
     V_l = list()
-    for i in range(0,A.shape[0]):
-        if random.randint(0,2)<=1 :
-            #training set
-            T.append(A[i])
-            T_l.append(L[i])
-        else :
-            #validation set
-            V.append(A[i])    
-            V_l.append(L[i])
-    return (np.array(T), np.array(T_l), np.array(V), np.array(V_l))
+    count = A.shape[0]
+    i = int(count * proportion)
+    indexes = range(0,count)
+    random.shuffle(indexes)
+    T = A[indexes[:i]]
+    V = A[indexes[i:]]
+    T_l = L[indexes[:i]]
+    V_l = L[indexes[i:]]
+    print V_l
+    return (np.matrix(T), np.matrix(T_l), np.matrix(V), np.matrix(V_l))

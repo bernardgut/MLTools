@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
+import random
+
 #### TODO #####
     #TODO : generate with correct variance
     #TODO : early stopping
@@ -9,19 +11,18 @@ import numpy as np
 
 ##PROG PARAMETERS##
 _debug = 0
-
 ##ALGO PARAMETERS##
 #no of hidden nodes [1:inf]
-h1 = 4
+h1 = 10
 #step size [0:1]
-rho = 0.1
+rho = 0.01
 #momentum factor [0:1]
-mu = 0.1
+mu = 0.3
 
 #validate
 def mlp_validation(X2, T2, W) :
     #Labels adjustment
-    T_t = np.add(T1,1)
+    T_t = np.add(T2,1)
     T_t = np.multiply(T_t,0.5)
     
     E = 0
@@ -34,13 +35,13 @@ def mlp_validation(X2, T2, W) :
             E_log = getError(A[2],  T_t[i])
             
             if _debug :
-                print 'descision for : ', xi
+                #print 'descision for : ', xi
                 print 'Label t for Xi : ',  T_t[i]
                 print 'a2 for given point :', A[2]
                 print 'Logistic Error for given point : ',E_log
             
             E = E + E_log
-    return E
+    return E #/X2.shape[0]
             
 ##train##
 def mlp_train(X1, T1, W=0) :
@@ -48,15 +49,15 @@ def mlp_train(X1, T1, W=0) :
     d = X1.shape[1]
     if W==0 : 
         #Generate initial weights layer 1
-        W1_odd = np.random.normal(0,np.sqrt(1.0/d),(h1,d))
-        W1_even = np.random.normal(0,np.sqrt(1.0/d),(h1,d))
-        B1_odd = np.random.normal(0,np.sqrt(1.0/d),(h1,1))
-        B1_even = np.random.normal(0,np.sqrt(1.0/d),(h1,1))
+        W1_odd = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,d)))
+        W1_even = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,d)))
+        B1_odd = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,1)))
+        B1_even = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,1)))
         
-        print 1.0/d
+        print 'standard deviation :', 1.0/d
         #Generate initial weights layer 2 
-        W2 = np.random.normal(0,1.0,(h1,1))
-        B2 = np.random.normal(0,1.0)
+        W2 = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,1)))
+        B2 = np.matrix(np.random.normal(0,np.sqrt(1.0/d)))
 
         W = [W1_odd,W1_even,B1_odd,B1_even,W2,B2]
 
@@ -80,7 +81,7 @@ def mlp_train(X1, T1, W=0) :
         E_log = getError(A[2],  T_t[i])
         
         if _debug :
-            print 'descision for : ', xi
+            #print 'descision for : ', xi
             print 'Label t for Xi : ',  T_t[i]
             print 'a2 for given point :', A[2]
             print 'Logistic Error for given point : ',E_log
@@ -110,6 +111,14 @@ def mlp_train(X1, T1, W=0) :
     #print 'Max error in gradient : ', max_error
     return W
 
+#reshuffle
+def reshuffle(X,L) : 
+    indexes = range(0,X.shape[0])
+    random.shuffle(indexes)
+    S = X[indexes[:]]
+    T = L[indexes[:]]
+    return (S, T)
+    
 #Logistic error for output a2 for a2.len datapoints and n2.len labels
 def getError(a2, labels) :
     s = 0
@@ -179,9 +188,10 @@ def backwardPass(A,W2,Xi,Ti) :
 
 ###RUN SCRIPT###
 #load data
-#X1=np.load('mnist/nTrainingSet.npy')
-#T1=np.load('mnist/nTrainingSet_labels.npy')
-#X2=np.load('mnist/nValidationSet.npy')
+X1=np.load('mnist/n_MNIST_Training.npy')
+T1=np.load('mnist/n_MNIST_Training_labels.npy')
+X2=np.load('mnist/n_MNIST_Validation.npy')
+T2=np.load('mnist/n_MNIST_Validation_labels.npy')
 #T = np.load('mnist/labels.npy')
 
 #xor problem big
@@ -191,26 +201,33 @@ def backwardPass(A,W2,Xi,Ti) :
 #T2 = np.load('mnist/n_XOR_Validation_labels.npy')
 
 #xor proplem small
-X1 = np.array([[0,0],[1,0],[0,1],[1,1]])
-T1 = np.array([[-1],[1],[1],[-1]])
-X2 = np.array([[0,0],[1,0],[0,1],[1,1]])
-T2 = np.array([[-1],[1],[1],[-1]])
+#X1 = np.array([[0,0],[1,0],[0,1],[1,1]])
+#T1 = np.array([[-1],[1],[1],[-1]])
+#X2 = np.array([[0,0],[1,0],[0,1],[1,1]])
+#T2 = np.array([[-1],[1],[1],[-1]])
 #print 'load success'
 #print 'Training set X1: ', X1.shape,' ; Valitation set X2: '#, X2.shape, ' ; labels set T1:', T1.shape, ' ; labels set T2:', T2.shape
 
 W = 0
 Emin = 999999
 count = 0
-
-for epoch in range (0,1000) : 
+epoch = 0
+early_s = 0
+while epoch<100 and not early_s : 
+    #(X1,T1) = reshuffle(X1,T1)
     W = mlp_train(X1,T1,W)
     E = mlp_validation(X2,T2,W)
-    print 'epoch ',epoch,' , validation error E =', E
+    #print info
+    print 'epoch ',epoch,' , validation error E =', E,' - delta :', E-Emin
     
-    #early stopping
-    if E>Emin : 
+    #early stopping, only after the first 100 epochs, it can be that you go in the wrond dir at start
+    if E>Emin and epoch>50 : 
         Wmin = W
         count=count+1
     else :
+        Emin = E
         if count>0 : count = count-1
+    if count >10 : early_s = 1 
+    epoch = epoch + 1
+    
     #convergence test
