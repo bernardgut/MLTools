@@ -4,9 +4,10 @@ import numpy as np
 import random
 
 #### TODO #####
-    #TODO : generate with correct variance
     #TODO : early stopping
-
+    #TODO : stats
+    #TODO : exemple of overfitting
+        
 ##############
 
 ##PROG PARAMETERS##
@@ -26,7 +27,6 @@ def mlp_validation(X2, T2, W) :
     T_t = np.multiply(T_t,0.5)
     
     E = 0
-    if _debug : print '=====================validation for epoch======================='
     for i in range(0,X2.shape[0]) :
             xi = np.matrix(X2[i])
             #Forward pass, A - activators :[A1_odd, A1_even, A2]
@@ -71,8 +71,7 @@ def mlp_train(X1, T1, W=0) :
     #correction at iteration k
     DW_k = [0, 0, 0, 0, 0, 0]
     #max_error = 0
-    #for epoch in range(0,1000) :
-    if _debug : print '======================train epoch=========================' 
+         
     for i in range(0,X1.shape[0]) :
         xi = np.matrix(X1[i])
         #Forward pass, A - activators :[A1_odd, A1_even, A2]
@@ -216,7 +215,9 @@ early_s = 0
 while epoch<100 and not early_s : 
     #(X1,T1) = reshuffle(X1,T1)
     W = mlp_train(X1,T1,W)
+    if _debug : print '====================== Epoch ',epoch,': training ========================='
     E = mlp_validation(X2,T2,W)
+    if _debug : print '====================== Epoch ',epoch,': validating ======================='
     #print info
     print 'epoch ',epoch,' , validation error E =', E,' - delta :', E-Emin
     
