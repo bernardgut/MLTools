@@ -1,19 +1,23 @@
 import numpy as np
 
 #### AGLG
-tau_high = 10e-4
+tau = 10e-8
 C = 1
-tau_low = 10e-15
+threshold = 10e-15
 def select_pair(F, I_low, I_up) : 
     ma = np.amax(F[I_low])
     mi = np.amin(F[I_up])
     indexes = range(0,F.shape[0])
     i_low = [i for i in indexes if i in I_low and F[i,0]==ma]
     i_up = [i for i in indexes if i in I_up and F[i,0]==mi]
+    #Check for optimality
+    if F[i_low[0]] <= (F[I_up[0]]+2*tau) :
+        i_low[0] = -1
+        i_up[0] = -1
     return (i_low[0], i_up[0])
 
 def gaussian(A) :
-    return np.exp(-tau_high*A)
+    return np.exp(-tau*A)
     
 def initK(X) :
     XXT = (X*X.T)
@@ -63,7 +67,7 @@ while 1 :
     H = min(C, sigma*w + IC)
     alpha_new_j = 0
     rho = K[i,i] + K[j,j] - 2*K[i,j]
-    if rho > tau_low :
+    if rho > threshold :
         alpha_unc = Alpha[j,0] + (T[j,0]*(F[i,0]-F[j,0])/rho)
         if alpha_unc in range(L,H) : 
            alpha_new_j = alpha_unc
@@ -85,8 +89,9 @@ while 1 :
             alpha_new_j
     alpha_new_i = Alpha[i,0] + sigma*(Alpha[j,0] - alpha_new_j)
     F = np.add(F,np.add(T[i,0]*(alpha_new_i-Alpha[i,0])*K[:,i],T[j,0]*(alpha_new_j - Alpha[i,0])*K[:,j]))
-    print F
+    print "F : ",F
     Alpha[i,0] = alpha_new_i
     Alpha[j,0] = alpha_new_j
     (I_low, I_up) = indexSets(Alpha)
+print "F final : ",F
     
