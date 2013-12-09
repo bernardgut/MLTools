@@ -1,9 +1,11 @@
 import numpy as np
 
-#### AGLG
+####Parameters
 tau = 10e-4
-C = 1
+tauGaussian = 0.5
+C = 0.01
 threshold = 10e-15
+#Select the most violated pair
 def select_pair(F, I_low, I_up) : 
     ma = np.amax(F[I_low])
     mi = np.amin(F[I_up])
@@ -16,14 +18,44 @@ def select_pair(F, I_low, I_up) :
         i_up[0] = -1
     return (i_low[0], i_up[0])
 
+#Genereate 10-fold set for cross-validation
+def split(X,T,i) :
+    size = X.shape[0]/10
+    n = X.shape[0]
+    range(i*size,((i+1)*size))
+    if i == 0 :
+        V_l = X[range(0,size),:]
+        V_t = T[range(0,size),:]
+        T_l = X[range(size,n),:]
+        T_t = T[range(size,n),:]
+    if i == 9 :
+        T_l = X[range(0,n-size),:]
+        T_t = T[range(0,n-size),:]
+        V_l = X[range(n-size,n),:]
+        V_t = T[range(n-size,n),:]
+    if i < 9 and i > 0 :
+        T_l_low = X[range(0,i*size),:]
+        T_l_high = X[range((i+1)*size,n),:]
+        T_t_low = T[range(0,i*size),:]
+        T_t_high = T[range((i+1)*size,n),:]
+        T_l = np.concatenate((T_l_low,T_l_high),axis=0)
+        T_t = np.concatenate((T_t_low,T_t_high),axis=0)
+        V_l = X[range(i*size,((i+1)*size)),:]
+        V_t = T[range(i*size,((i+1)*size)),:]
+    return (T_t,T_l,V_t,V_l)
+#Gaussian function
 def gaussian(A) :
-    return np.exp(-tau*A)
-    
-def initK(X) :
-    XXT = (np.asmatrix(X)*np.asmatrix(X.T))
-    d = XXT.diagonal().T
-    ones = np.asmatrix(np.ones(d.shape))
-    A = 0.5*(d*ones.T) + 0.5*(ones*d.T) - XXT
+    return np.exp(-tauGaussian*A)
+#Initialize the kernel matrix 
+def initK(X,Y) :
+    XYT = (np.asmatrix(X)*np.asmatrix(Y.T))
+    XXT = np.asmatrix(X)*np.asmatrix(X.T)
+    YYT = np.asmatrix(Y)*np.asmatrix(Y.T)
+    dxx = XXT.diagonal().T
+    dyy = YYT.diagonal().T
+    onesXX = np.asmatrix(np.ones(Y.shape[0])).T
+    onesYY = np.asmatrix(np.ones(X.shape[0])).T
+    A = 0.5*(dxx*onesXX.T) + 0.5*(onesYY*dyy.T) - XYT
     return gaussian(A)
 
 #init sets
@@ -33,15 +65,19 @@ def indexSets(Alpha) :
     I_p = [i for i in indexes if (T[i,0]==1 and Alpha[i,0]==0) or (T[i,0]==-1 and Alpha[i,0]==C)]
     I_m = [i for i in indexes if (T[i,0]==-1 and Alpha[i,0]==0) or (T[i,0]==1 and Alpha[i,0]==C)]
     return (I_0 + I_p, I_0 + I_m)
-    
+
+def criterion(Alpha, T):
+    return (0.5*np.sum(np.sum(np.multiply(Alpha * Alpha.T, T * T.T, K), 0), 1) - np.sum(Alpha, 0)).flat[0]
     
 #little xor problem
-#X = np.matrix('(0,0);(1,0);(0,1);(1,1)')
-#T = np.matrix('(-1);(1);(1);(-1)')
+X = np.matrix('(-1,-1);(1,-1);(-1,1);(1,1)')
+V = np.matrix('(-1,-1);(1,-1);(-1,1);(1,1)')
+T = np.matrix('(-1);(1);(1);-(1)')
+#(A,B,C,D) = split(X,T,3)
 
 #Big training dataset
-X=np.load('mnist/n_MNIST_Training.npy')
-T=np.load('mnist/n_MNIST_Training_labels.npy')
+#X=np.load('mnist/n_MNIST_Training.npy')[:100,:]
+#T=np.load('mnist/n_MNIST_Training_labels.npy')[:100,:]
 
 #Big validation dataset
 #X2=np.load('mnist/n_MNIST_Validation.npy')
@@ -54,7 +90,8 @@ n = X.shape[0]
 
 #initialization
 F = -T
-K = initK(X)
+K = initK(X,X)
+Ktest = initK(X,V)
 Alpha = np.asmatrix(np.zeros((n,1)))
 (I_up, I_low) = indexSets(Alpha)
 ##print I_low
@@ -63,6 +100,7 @@ Alpha = np.asmatrix(np.zeros((n,1)))
 #print K
 while 1 :
     (i,j) = select_pair(F, I_low, I_up)
+    print (i,j)    
     if j == -1 :
         break
     sigma = T[i,0]*T[j,0]
@@ -90,7 +128,6 @@ while 1 :
     else : #Second derivative is negative
         L_i = w - sigma*L
         H_i = w - sigma*H
-        #partie insupportable
         v_i = F[i,0] + T[i,0] - Alpha[i,0]*T[i,0]*K[i,i] - Alpha[j,0]*T[j,0]*K[i,j]
         v_j = F[j,0] + T[j,0] - Alpha[i,0]*T[i,0]*K[i,j] - Alpha[j,0]*T[j,0]*K[j,j]
         phi_L = 0.5*(K[i,i]*L_i*L_i+K[j,j]*L*L)+sigma*K[i,j]*L_i*L+T[i,0]*L_i*v_i + T[j,0]*L*v_j - L_i - L
@@ -100,11 +137,30 @@ while 1 :
         else :
             alpha_new_j = L
     alpha_new_i = Alpha[i,0] + sigma*(Alpha[j,0] - alpha_new_j)
-    F = np.add(F,np.add(T[i,0]*(alpha_new_i-Alpha[i,0])*K[:,i],T[j,0]*(alpha_new_j - Alpha[i,0])*K[:,j]))
-    #print "F : ",F
+    F = np.add(F,np.add(T[i,0]*(alpha_new_i-Alpha[i,0])*K[:,i],T[j,0]*(alpha_new_j - Alpha[j,0])*K[:,j]))
+    #Update alpha
     Alpha[i,0] = alpha_new_i
     Alpha[j,0] = alpha_new_j
+    print "criterion", criterion(Alpha, T)
+    #Check constraint must be equal to 0
+    print np.sum(np.multiply(T, Alpha))
     (I_up, I_low) = indexSets(Alpha)
-print F
+print "Alpha"
 print Alpha
-    
+#Compute W
+#W = np.dot(np.multiply(Alpha[:,0],T[:,0]).T, X).T 
+
+#Compute b
+S = [i for i in range(0,Alpha.shape[0]) if Alpha[i,0]>=0 or Alpha[i,0]<=C]
+Y = -np.dot(np.multiply(Alpha[:,0],T[:,0]).T,K).T
+b = np.sum(np.add(T,Y))/np.size(S)
+#Prediction
+
+print np.dot(np.multiply(Alpha[:,0],T[:,0]).T,Ktest[:,2]) - b
+#print "W"
+#print W
+#print "b"
+#print b
+#print "X"
+#print X
+#print np.dot(W.T,X.T) - b
