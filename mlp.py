@@ -4,7 +4,6 @@ import numpy as np
 import random
 
 #### TODO #####
-    #TODO : early stopping
     #TODO : stats
     #TODO : exemple of overfitting
         
@@ -14,117 +13,33 @@ import random
 _debug = 0
 ##ALGO PARAMETERS##
 #no of hidden nodes [1:inf]
-h1 = 10
+h1 = 15
 #step size [0:1]
 rho = 0.01
 #momentum factor [0:1]
-mu = 0.3
+mu = 0.7
 
-#validate
-def mlp_validation(X2, T2, W) :
-    #Labels adjustment
-    T_t = np.add(T2,1)
+#Labels adjustment
+def adjustLabels(T):
+    T_t = np.add(T,1)
     T_t = np.multiply(T_t,0.5)
-    
-    E = 0
-    for i in range(0,X2.shape[0]) :
-            xi = np.matrix(X2[i])
-            #Forward pass, A - activators :[A1_odd, A1_even, A2]
-            A = forwardPass(xi,W)
-            #display error for current point
-            E_log = getError(A[2],  T_t[i])
-            
-            if _debug :
-                #print 'descision for : ', xi
-                print 'Label t for Xi : ',  T_t[i]
-                print 'a2 for given point :', A[2]
-                print 'Logistic Error for given point : ',E_log
-            
-            E = E + E_log
-    return E #/X2.shape[0]
-            
-##train##
-def mlp_train(X1, T1, W=0) :
-    #dimensionality
-    d = X1.shape[1]
-    if W==0 : 
-        #Generate initial weights layer 1
-        W1_odd = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,d)))
-        W1_even = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,d)))
-        B1_odd = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,1)))
-        B1_even = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,1)))
-        
-        print 'standard deviation :', 1.0/d
-        #Generate initial weights layer 2 
-        W2 = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,1)))
-        B2 = np.matrix(np.random.normal(0,np.sqrt(1.0/d)))
-
-        W = [W1_odd,W1_even,B1_odd,B1_even,W2,B2]
-
-    #Labels adjustment
-    T_t = np.add(T1,1)
-    T_t = np.multiply(T_t,0.5)
-    
-    #Deltas W :
-    #correction at iteration k-1
-    DW_kminone = [0, 0, 0, 0, 0, 0]
-    #correction at iteration k
-    DW_k = [0, 0, 0, 0, 0, 0]
-    #max_error = 0
-         
-    for i in range(0,X1.shape[0]) :
-        xi = np.matrix(X1[i])
-        #Forward pass, A - activators :[A1_odd, A1_even, A2]
-        A = forwardPass(xi,W)
-        #display error for current point
-        E_log = getError(A[2],  T_t[i])
-        
-        if _debug :
-            #print 'descision for : ', xi
-            print 'Label t for Xi : ',  T_t[i]
-            print 'a2 for given point :', A[2]
-            print 'Logistic Error for given point : ',E_log
-        
-        #Backward pass GRAD : Residues : [dwo1_Ei, dwe1_Ei, R1_odd, R1_even, dw2_Ei, R2]  
-        GRAD = backwardPass(A, W[4], xi, T_t[i])
-        #error = test_gradient(GRAD, W, d, h1)
-       	#if error > max_error :
-		#	max_error = error
-
-        #Gradient descent
-        DW_k[0] = np.add(-np.multiply(rho*(1-mu), GRAD[0]),np.multiply(mu,DW_kminone[0]))
-        DW_k[1] = np.add(-np.multiply(rho*(1-mu), GRAD[1]),np.multiply(mu,DW_kminone[1]))
-        DW_k[2] = np.add(-np.multiply(rho*(1-mu), GRAD[2]),np.multiply(mu,DW_kminone[2]))
-        DW_k[3] = np.add(-np.multiply(rho*(1-mu), GRAD[3]),np.multiply(mu,DW_kminone[3]))
-        DW_k[4] = np.add(-np.multiply(rho*(1-mu), GRAD[4]),np.multiply(mu,DW_kminone[4]))
-        DW_k[5] = np.add(-np.multiply(rho*(1-mu), GRAD[5]),np.multiply(mu,DW_kminone[5]))
-        
-        #apply correction
-        W[0] = np.add(W[0], DW_k[0])
-        W[1] = np.add(W[1], DW_k[1])
-        W[2] = np.add(W[2], DW_k[2])
-        W[3] = np.add(W[3], DW_k[3])
-        W[4] = np.add(W[4], DW_k[4])
-        W[5] = np.add(W[5], DW_k[5])
-    #end train phase for epoch
-    #print 'Max error in gradient : ', max_error
-    return W
+    return T_t.astype(int)
 
 #reshuffle
 def reshuffle(X,L) : 
     indexes = range(0,X.shape[0])
     random.shuffle(indexes)
-    S = X[indexes[:]]
-    T = L[indexes[:]]
+    S = X[indexes]
+    T = L[indexes]
     return (S, T)
     
 #Logistic error for output a2 for a2.len datapoints and n2.len labels
 def getError(a2, labels) :
-    s = 0
     #all are element-wise operations
-    x = np.log(1+np.exp(np.dot(-labels,a2)))
+    if labels == 0 : labels = -1
+    x = np.log1p(np.exp(np.multiply(-labels,a2)))
     #print 'getError shape ', x.shape
-    return np.sum(x)
+    return x
 
 #transfer funtion
 #def transferF(a1,a2) :
@@ -132,7 +47,7 @@ def getError(a2, labels) :
 
 #sigma function
 def sigmaF(x) :
-    return 1/(1+np.exp(-x))
+    return np.divide(1 , np.add(1, np.exp(-x)))
 
 #Forward pass Perceptron Algorithm
 def forwardPass(Xi, W) :
@@ -151,7 +66,8 @@ def forwardPass(Xi, W) :
 
     A2 = np.multiply(A1_odd, sigmaF(A1_even))
     A2 = np.dot(np.transpose(A2),W2)
-    A2 = A2 + B2
+    A2 = np.add(A2, B2)
+    
     return [A1_odd, A1_even, A2]
 
 #Backward pass Percepton Algorithm
@@ -165,34 +81,125 @@ def backwardPass(A,W2,Xi,Ti) :
     dw2_Ei = np.multiply(R2,  np.multiply(A1_odd, sigmaF(A1_even)))
     #layer 1
     R1_odd = np.multiply(R2, np.multiply(W2, sigmaF(A1_even)))
-    R1_even = np.multiply(R2, np.multiply(W2, np.multiply(sigmaF(A1_even),sigmaF(-A1_even))))
+    R1_even = np.multiply(R2, np.multiply(A1_odd, np.multiply(W2, np.multiply(sigmaF(A1_even),sigmaF(-A1_even)))))
 
     dwo1_Ei = np.outer(R1_odd,Xi)
     dwe1_Ei = np.outer(R1_even,Xi)
     return [dwo1_Ei, dwe1_Ei, R1_odd, R1_even, dw2_Ei, R2]  
 
+#validate
+def mlp_validation(X2, T2, W) :
+    
+    count = 0
+    E = 0
+    for i in range(0,X2.shape[0]) :
+            xi = np.matrix(X2[i])
+            #Forward pass, A - activators :[A1_odd, A1_even, A2]
+            A = forwardPass(xi,W)
+            #display error for current point
+            E_log = getError(A[2],  T2[i])
+            
+            #count mistaken classements
+            if (A[2] < 0 and T2[i]==1) or (A[2] > 0 and T2[i]==0) : count = count+1
+            if _debug :
+                #print 'descision for : ', xi
+                print 'Label t for Xi : ',  T2[i]
+                print 'a2 for given point :', A[2]
+                print 'Logistic Error for given point : ',E_log
+            
+            E = E + E_log
+    return (E/X2.shape[0], count)
+            
+##train##
+def mlp_train(X1, T1, W=0) :
+    #dimensionality
+    d = X1.shape[1]
+    if W==0 : 
+    
+        #Generate initial weights layer 1
+        W1_odd = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,d)))
+        W1_even = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,d)))
+        B1_odd = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,1)))
+        B1_even = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,1)))
+        
+        #Generate initial weights layer 2 
+        W2 = np.matrix(np.random.normal(0,np.sqrt(1.0/d),(h1,1)))
+        B2 = np.matrix(np.random.normal(0,np.sqrt(1.0/d)))
 
+        W = [W1_odd,W1_even,B1_odd,B1_even,W2,B2]
+    
+    #Deltas W :
+    #correction at iteration k-1
+    DW_kminone = [0, 0, 0, 0, 0, 0]
+    #correction at iteration k
+    DW_k = [0, 0, 0, 0, 0, 0]
 
+    E = 0     
+    count = 0    
+    for i in range(0,X1.shape[0]) :
+        xi = np.matrix(X1[i])
+        #Forward pass, A - activators :[A1_odd, A1_even, A2]
+        A = forwardPass(xi,W)
+        #display error for current point
+        E_log = getError(A[2],  T1[i])
+        E = E + E_log
+        #count mistaken classements
+        if ((A[2] < 0) and (T1[i]==1)) or ((A[2] > 0) and (T1[i]==0)) : count = count+1
+            
+        #Backward pass GRAD : Residues : GRAD = [dwo1_Ei, dwe1_Ei, R1_odd, R1_even, dw2_Ei, R2]   
+        GRAD = backwardPass(A, W[4], xi, T1[i])
 
-#Forward pass
-#A1_o = w_o* 
-#A1_e =
-#A2 =
-#display data
-#imgplot = plt.imshow(A)
-#plt.show()
-#np.reshape(A, A.size)
+        #Gradient descent
+        DW_k[0] = np.add(-np.multiply(rho*(1-mu), GRAD[0]),np.multiply(mu,DW_kminone[0]))
+        DW_k[1] = np.add(-np.multiply(rho*(1-mu), GRAD[1]),np.multiply(mu,DW_kminone[1]))
+        DW_k[2] = np.add(-np.multiply(rho*(1-mu), GRAD[2]),np.multiply(mu,DW_kminone[2]))
+        DW_k[3] = np.add(-np.multiply(rho*(1-mu), GRAD[3]),np.multiply(mu,DW_kminone[3]))
+        DW_k[4] = np.add(-np.multiply(rho*(1-mu), GRAD[4]),np.multiply(mu,DW_kminone[4]))
+        DW_k[5] = np.add(-np.multiply(rho*(1-mu), GRAD[5]),np.multiply(mu,DW_kminone[5]))
+        
+        #apply correction : W = [W1_odd,W1_even,B1_odd,B1_even,W2,B2]
+        W[0] = np.add(W[0], DW_k[0])
+        W[1] = np.add(W[1], DW_k[1])
+        W[2] = np.add(W[2], DW_k[2])
+        W[3] = np.add(W[3], DW_k[3])
+        W[4] = np.add(W[4], DW_k[4])
+        W[5] = np.add(W[5], DW_k[5])
+        
+        DW_kminone = DW_k
+        
+        if _debug :
+            #print 'descision for : ', xi
+            print 'Label t for Xi : ',  T1[i]
+            print 'a2 for given point :', A[2]
+            print 'Logistic Error for given point : ',E_log
+        
+        
+    #end train phase for epoch
+    return (W, E/X1.shape[0], count)
 
 #################################
 
 ###RUN SCRIPT###
 #load data
-X1=np.load('mnist/n_MNIST_Training.npy')
-T1=np.load('mnist/n_MNIST_Training_labels.npy')
-X2=np.load('mnist/n_MNIST_Validation.npy')
-T2=np.load('mnist/n_MNIST_Validation_labels.npy')
-#T = np.load('mnist/labels.npy')
+T1_d=np.load('mnist/n_MNIST_Training35.npy')
+T1_l=np.load('mnist/n_MNIST_Training_labels35.npy')
+V1_d=np.load('mnist/n_MNIST_Validation35.npy')
+V1_l=np.load('mnist/n_MNIST_Validation_labels35.npy')
 
+T2_d=np.load('mnist/n_MNIST_Training49.npy')
+T2_l=np.load('mnist/n_MNIST_Training_labels49.npy')
+V2_d=np.load('mnist/n_MNIST_Validation49.npy')
+V2_l=np.load('mnist/n_MNIST_Validation_labels49.npy')
+
+#adjust labels to [0-1] (T tilda)
+T1_l=adjustLabels(T1_l)
+V1_l=adjustLabels(V1_l)
+T2_l=adjustLabels(T2_l)
+V2_l=adjustLabels(V2_l)
+
+print 'load success : '
+print '3-5 : Training : ', T1_d.shape, ' l : ',T1_l.shape, ' ; Validation : ',V1_d.shape, ' l : ',V1_l.shape
+print '4-9 : Training : ', T2_d.shape, ' l : ',T2_l.shape, ' ; Validation : ',V2_d.shape, ' l : ', V2_l.shape
 #xor problem big
 #X1 = np.load('mnist/n_XOR_Training.npy')
 #X2 = np.load('mnist/n_XOR_Validation.npy')
@@ -204,31 +211,81 @@ T2=np.load('mnist/n_MNIST_Validation_labels.npy')
 #T1 = np.array([[-1],[1],[1],[-1]])
 #X2 = np.array([[0,0],[1,0],[0,1],[1,1]])
 #T2 = np.array([[-1],[1],[1],[-1]])
-#print 'load success'
-#print 'Training set X1: ', X1.shape,' ; Valitation set X2: '#, X2.shape, ' ; labels set T1:', T1.shape, ' ; labels set T2:', T2.shape
 
+run = 0
+print 'begining run ',run,' with  parameters :'
+print 'step size: \t\trho\t= ', rho
+print 'momentum factor: \tmu\t= ', mu
+print 'Total # hidden layers: \t|A|\t= ', 2*h1 
+
+#BEGIN
 W = 0
-Emin = 999999
-count = 0
+W_min=0
+E_min = 999999
+W_min2=0
+E_min2 = 999999
+missed_min = 99999
+missed_min2 = 99999
+
+Errors_train = list()
+Errors_val = list()
+MissedList_train = list()
+MissedList_val = list()
+
+es_count = 0
 epoch = 0
-early_s = 0
-while epoch<100 and not early_s : 
-    #(X1,T1) = reshuffle(X1,T1)
-    W = mlp_train(X1,T1,W)
+early_s = False
+while epoch<30 : #and early_s = False
+    #randomize the order in which the data is read
+    (T1_d,T1_l) = reshuffle(T1_d,T1_l)
+    (V1_d,V1_l) = reshuffle(V1_d,V1_l)
+    #training and validation
     if _debug : print '====================== Epoch ',epoch,': training ========================='
-    E = mlp_validation(X2,T2,W)
+    (W, E_train, missed_train) = mlp_train(T1_d,T1_l,W)
+    Errors_train.append(E_train)
+    MissedList_train.append(missed_train)
+    
     if _debug : print '====================== Epoch ',epoch,': validating ======================='
+    (E_val, missed_val) = mlp_validation(V1_d,V1_l,W)
+    Errors_val.append(E_val)
+    MissedList_val.append(missed_val)
+    
     #print info
-    print 'epoch ',epoch,' , validation error E =', E,' - delta :', E-Emin
+    print 'epoch ',epoch,' , train error E =', E_train,' mistakes : ',missed_train
+    print 'epoch ',epoch,' , validation error E =', E_val,' - delta :', E_val-E_min,' mistakes : ',missed_val
     
-    #early stopping, only after the first 100 epochs, it can be that you go in the wrond dir at start
-    if E>Emin and epoch>50 : 
-        Wmin = W
-        count=count+1
-    else :
-        Emin = E
-        if count>0 : count = count-1
-    if count >10 : early_s = 1 
+    #early stopping, only after the first epoch, it can be that you go in the wrond dir at start
+    #we allow the algorithm to go up sparsely, in a moving average fashion
+    #note that we want the algorithm to make as few mistakes as possible, so we count only when the number of mistakes goes up. this allows for the error to go up as long as there are less mistakes. Experimentally this was better (report)
+    
+    if E_val-E_min>0 and missed_val>missed_min and epoch>0 : 
+        es_count=es_count+1
+    elif E_val-E_min<0 :
+        W_min = W
+        E_min = E_val
+        missed_min = missed_val
+        if es_count>0 : es_count = es_count - 1 
+    elif missed_val<missed_min2 :
+        missed_min2=missed_val
+        W_min2 = W
+        E_min2 = E_val
+        if es_count>0 : es_count = es_count - 1 
+    elif missed_val==missed_min2 :
+        if E_val<E_min2 :
+            W_min2 = W
+            E_min2 = E_val
+            if es_count>0 : es_count = es_count - 1 
+    if es_count >= 5 : early_s = True 
+    #go to the next epoch
     epoch = epoch + 1
-    
-    #convergence test
+
+#show and save results
+print 'best validation error (non-normalized) : ', E_min,' ; with mistakes : ', missed_min
+print 'best validation error (non-normalized) with respect to mistakes : ',E_min2,' ; with mistakes : ', missed_min2
+filename='r'+str(run)+'-h1'+str(h1)+'R'+str(rho)+'M'+str(mu)
+np.save('results/mlp/ET'+filename,Errors_train)
+np.save('results/mlp/EV'+filename,Errors_val)
+np.save('results/mlp/MT'+filename,MissedList_train)
+np.save('results/mlp/MT'+filename,MissedList_val)
+
+
