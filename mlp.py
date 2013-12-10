@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 import random
+import os
 
 #### TODO #####
     #TODO : stats
@@ -10,14 +11,25 @@ import random
 ##############
 
 ##PROG PARAMETERS##
-#_debug = 0
+_debug = 0
 ##ALGO PARAMETERS##
 #no of hidden nodes [1:inf]
-#h1 = 15
+h1 = 15
 #step size [0:1]
-#rho = 0.01
+rho = 0.01
 #momentum factor [0:1]
-#mu = 0.6
+mu = 0.6
+
+#Algorithm parameters initialisation
+def init(_h1, _rho, _mu, debug) :
+    global h1
+    global rho 
+    global mu 
+    global _debug
+    h1 = _h1
+    rho = _rho
+    mu = _mu
+    _debug = debug
 
 #Labels adjustment
 def adjustLabels(T):
@@ -39,7 +51,7 @@ def getError(a2, labels) :
     if labels == 0 : labels = -1
     x = np.log1p(np.exp(np.multiply(-labels,a2)))
     #print 'getError shape ', x.shape
-    return x
+    return x.item()
 
 #transfer funtion
 #def transferF(a1,a2) :
@@ -180,7 +192,10 @@ def mlp_train(X1, T1, W=0) :
 #################################
 
 ###RUN SCRIPT###
-def run(h1=15, rho=0.01, mu=0.6, _debug=0) : 
+def run(_h1=15, _eta=0.01, _mu=0.6,run=0, debug=0) : 
+    #alogorithm param init
+    init(_h1, _eta, _mu, debug)
+    
     #load data
     T1_d=np.load('mnist/n_MNIST_Training35.npy')
     T1_l=np.load('mnist/n_MNIST_Training_labels35.npy')
@@ -213,7 +228,6 @@ def run(h1=15, rho=0.01, mu=0.6, _debug=0) :
     #X2 = np.array([[0,0],[1,0],[0,1],[1,1]])
     #T2 = np.array([[-1],[1],[1],[-1]])
 
-    run = 0
     print 'begining run ',run,' with  parameters :'
     print 'step size: \t\trho\t= ', rho
     print 'momentum factor: \tmu\t= ', mu
@@ -236,7 +250,7 @@ def run(h1=15, rho=0.01, mu=0.6, _debug=0) :
     es_count = 0
     epoch = 0
     early_s = False
-    while epoch<2 : #and early_s = False
+    while epoch<30 : #and early_s = False
         #randomize the order in which the data is read
         (T1_d,T1_l) = reshuffle(T1_d,T1_l)
         (V1_d,V1_l) = reshuffle(V1_d,V1_l)
@@ -283,10 +297,18 @@ def run(h1=15, rho=0.01, mu=0.6, _debug=0) :
     #show and save results
     print 'best validation error (non-normalized) : ', E_min,' ; with mistakes : ', missed_min
     print 'best validation error (non-normalized) with respect to mistakes : ',E_min2,' ; with mistakes : ', missed_min2
-    filename='h1'+str(h1)+'R'+str(rho)+'M'+str(mu)+'run'+str(run)
-    np.save('results/mlp/ET_'+filename,Errors_train)
-    np.save('results/mlp/EV_'+filename,Errors_val)
-    np.save('results/mlp/MT_'+filename,MissedList_train)
-    np.save('results/mlp/MV_'+filename,MissedList_val)
+    
+    directory='h'+str(h1)+'R'+str(rho)+'M'+str(mu)
+    directory='results/mlp/'+directory
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        
+    np.save(directory+'/ET_'+str(run), np.array(Errors_train))
+    np.save(directory+'/EV_'+str(run), np.array(Errors_val))
+    np.save(directory+'/MT_'+str(run), np.array(MissedList_train))
+    np.save(directory+'/MV_'+str(run), np.array(MissedList_val))
+    
+###########################################################################
+#run()
 
 
