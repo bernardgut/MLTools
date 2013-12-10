@@ -10,14 +10,14 @@ import random
 ##############
 
 ##PROG PARAMETERS##
-_debug = 0
+#_debug = 0
 ##ALGO PARAMETERS##
 #no of hidden nodes [1:inf]
-h1 = 15
+#h1 = 15
 #step size [0:1]
-rho = 0.01
+#rho = 0.01
 #momentum factor [0:1]
-mu = 0.7
+#mu = 0.6
 
 #Labels adjustment
 def adjustLabels(T):
@@ -180,112 +180,113 @@ def mlp_train(X1, T1, W=0) :
 #################################
 
 ###RUN SCRIPT###
-#load data
-T1_d=np.load('mnist/n_MNIST_Training35.npy')
-T1_l=np.load('mnist/n_MNIST_Training_labels35.npy')
-V1_d=np.load('mnist/n_MNIST_Validation35.npy')
-V1_l=np.load('mnist/n_MNIST_Validation_labels35.npy')
+def run(h1=15, rho=0.01, mu=0.6, _debug=0) : 
+    #load data
+    T1_d=np.load('mnist/n_MNIST_Training35.npy')
+    T1_l=np.load('mnist/n_MNIST_Training_labels35.npy')
+    V1_d=np.load('mnist/n_MNIST_Validation35.npy')
+    V1_l=np.load('mnist/n_MNIST_Validation_labels35.npy')
 
-T2_d=np.load('mnist/n_MNIST_Training49.npy')
-T2_l=np.load('mnist/n_MNIST_Training_labels49.npy')
-V2_d=np.load('mnist/n_MNIST_Validation49.npy')
-V2_l=np.load('mnist/n_MNIST_Validation_labels49.npy')
+    T2_d=np.load('mnist/n_MNIST_Training49.npy')
+    T2_l=np.load('mnist/n_MNIST_Training_labels49.npy')
+    V2_d=np.load('mnist/n_MNIST_Validation49.npy')
+    V2_l=np.load('mnist/n_MNIST_Validation_labels49.npy')
 
-#adjust labels to [0-1] (T tilda)
-T1_l=adjustLabels(T1_l)
-V1_l=adjustLabels(V1_l)
-T2_l=adjustLabels(T2_l)
-V2_l=adjustLabels(V2_l)
+    #adjust labels to [0-1] (T tilda)
+    T1_l=adjustLabels(T1_l)
+    V1_l=adjustLabels(V1_l)
+    T2_l=adjustLabels(T2_l)
+    V2_l=adjustLabels(V2_l)
 
-print 'load success : '
-print '3-5 : Training : ', T1_d.shape, ' l : ',T1_l.shape, ' ; Validation : ',V1_d.shape, ' l : ',V1_l.shape
-print '4-9 : Training : ', T2_d.shape, ' l : ',T2_l.shape, ' ; Validation : ',V2_d.shape, ' l : ', V2_l.shape
-#xor problem big
-#X1 = np.load('mnist/n_XOR_Training.npy')
-#X2 = np.load('mnist/n_XOR_Validation.npy')
-#T1 = np.load('mnist/n_XOR_Training_labels.npy')
-#T2 = np.load('mnist/n_XOR_Validation_labels.npy')
+    print 'load success : '
+    print '3-5 : Training : ', T1_d.shape, ' l : ',T1_l.shape, ' ; Validation : ',V1_d.shape, ' l : ',V1_l.shape
+    print '4-9 : Training : ', T2_d.shape, ' l : ',T2_l.shape, ' ; Validation : ',V2_d.shape, ' l : ', V2_l.shape
+    #xor problem big
+    #X1 = np.load('mnist/n_XOR_Training.npy')
+    #X2 = np.load('mnist/n_XOR_Validation.npy')
+    #T1 = np.load('mnist/n_XOR_Training_labels.npy')
+    #T2 = np.load('mnist/n_XOR_Validation_labels.npy')
 
-#xor proplem small
-#X1 = np.array([[0,0],[1,0],[0,1],[1,1]])
-#T1 = np.array([[-1],[1],[1],[-1]])
-#X2 = np.array([[0,0],[1,0],[0,1],[1,1]])
-#T2 = np.array([[-1],[1],[1],[-1]])
+    #xor proplem small
+    #X1 = np.array([[0,0],[1,0],[0,1],[1,1]])
+    #T1 = np.array([[-1],[1],[1],[-1]])
+    #X2 = np.array([[0,0],[1,0],[0,1],[1,1]])
+    #T2 = np.array([[-1],[1],[1],[-1]])
 
-run = 0
-print 'begining run ',run,' with  parameters :'
-print 'step size: \t\trho\t= ', rho
-print 'momentum factor: \tmu\t= ', mu
-print 'Total # hidden layers: \t|A|\t= ', 2*h1 
+    run = 0
+    print 'begining run ',run,' with  parameters :'
+    print 'step size: \t\trho\t= ', rho
+    print 'momentum factor: \tmu\t= ', mu
+    print 'Total # hidden layers: \t|A|\t= ', 2*h1 
 
-#BEGIN
-W = 0
-W_min=0
-E_min = 999999
-W_min2=0
-E_min2 = 999999
-missed_min = 99999
-missed_min2 = 99999
+    #BEGIN
+    W = 0
+    W_min=0
+    E_min = 999999
+    W_min2=0
+    E_min2 = 999999
+    missed_min = 99999
+    missed_min2 = 99999
 
-Errors_train = list()
-Errors_val = list()
-MissedList_train = list()
-MissedList_val = list()
+    Errors_train = list()
+    Errors_val = list()
+    MissedList_train = list()
+    MissedList_val = list()
 
-es_count = 0
-epoch = 0
-early_s = False
-while epoch<30 : #and early_s = False
-    #randomize the order in which the data is read
-    (T1_d,T1_l) = reshuffle(T1_d,T1_l)
-    (V1_d,V1_l) = reshuffle(V1_d,V1_l)
-    #training and validation
-    if _debug : print '====================== Epoch ',epoch,': training ========================='
-    (W, E_train, missed_train) = mlp_train(T1_d,T1_l,W)
-    Errors_train.append(E_train)
-    MissedList_train.append(missed_train)
-    
-    if _debug : print '====================== Epoch ',epoch,': validating ======================='
-    (E_val, missed_val) = mlp_validation(V1_d,V1_l,W)
-    Errors_val.append(E_val)
-    MissedList_val.append(missed_val)
-    
-    #print info
-    print 'epoch ',epoch,' , train error E =', E_train,' mistakes : ',missed_train
-    print 'epoch ',epoch,' , validation error E =', E_val,' - delta :', E_val-E_min,' mistakes : ',missed_val
-    
-    #early stopping, only after the first epoch, it can be that you go in the wrond dir at start
-    #we allow the algorithm to go up sparsely, in a moving average fashion
-    #note that we want the algorithm to make as few mistakes as possible, so we count only when the number of mistakes goes up. this allows for the error to go up as long as there are less mistakes. Experimentally this was better (report)
-    
-    if E_val-E_min>0 and missed_val>missed_min and epoch>0 : 
-        es_count=es_count+1
-    elif E_val-E_min<0 :
-        W_min = W
-        E_min = E_val
-        missed_min = missed_val
-        if es_count>0 : es_count = es_count - 1 
-    elif missed_val<missed_min2 :
-        missed_min2=missed_val
-        W_min2 = W
-        E_min2 = E_val
-        if es_count>0 : es_count = es_count - 1 
-    elif missed_val==missed_min2 :
-        if E_val<E_min2 :
+    es_count = 0
+    epoch = 0
+    early_s = False
+    while epoch<2 : #and early_s = False
+        #randomize the order in which the data is read
+        (T1_d,T1_l) = reshuffle(T1_d,T1_l)
+        (V1_d,V1_l) = reshuffle(V1_d,V1_l)
+        #training and validation
+        if _debug : print '====================== Epoch ',epoch,': training ========================='
+        (W, E_train, missed_train) = mlp_train(T1_d,T1_l,W)
+        Errors_train.append(E_train)
+        MissedList_train.append(missed_train)
+        
+        if _debug : print '====================== Epoch ',epoch,': validating ======================='
+        (E_val, missed_val) = mlp_validation(V1_d,V1_l,W)
+        Errors_val.append(E_val)
+        MissedList_val.append(missed_val)
+        
+        #print info
+        print 'epoch ',epoch,' , train error E =', E_train,' mistakes : ',missed_train
+        print 'epoch ',epoch,' , validation error E =', E_val,' - delta :', E_val-E_min,' mistakes : ',missed_val
+        
+        #early stopping, only after the first epoch, it can be that you go in the wrond dir at start
+        #we allow the algorithm to go up sparsely, in a moving average fashion
+        #note that we want the algorithm to make as few mistakes as possible, so we count only when the number of mistakes goes up. this allows for the error to go up as long as there are less mistakes. Experimentally this was better (report)
+        
+        if E_val-E_min>0 and missed_val>missed_min and epoch>0 : 
+            es_count=es_count+1
+        elif E_val-E_min<0 :
+            W_min = W
+            E_min = E_val
+            missed_min = missed_val
+            if es_count>0 : es_count = es_count - 1 
+        elif missed_val<missed_min2 :
+            missed_min2=missed_val
             W_min2 = W
             E_min2 = E_val
             if es_count>0 : es_count = es_count - 1 
-    if es_count >= 5 : early_s = True 
-    #go to the next epoch
-    epoch = epoch + 1
+        elif missed_val==missed_min2 :
+            if E_val<E_min2 :
+                W_min2 = W
+                E_min2 = E_val
+                if es_count>0 : es_count = es_count - 1 
+        if es_count >= 5 : early_s = True 
+        #go to the next epoch
+        epoch = epoch + 1
 
-#show and save results
-print 'best validation error (non-normalized) : ', E_min,' ; with mistakes : ', missed_min
-print 'best validation error (non-normalized) with respect to mistakes : ',E_min2,' ; with mistakes : ', missed_min2
-filename='r'+str(run)+'-h1'+str(h1)+'R'+str(rho)+'M'+str(mu)
-np.save('results/mlp/ET'+filename,Errors_train)
-np.save('results/mlp/EV'+filename,Errors_val)
-np.save('results/mlp/MT'+filename,MissedList_train)
-np.save('results/mlp/MT'+filename,MissedList_val)
+    #show and save results
+    print 'best validation error (non-normalized) : ', E_min,' ; with mistakes : ', missed_min
+    print 'best validation error (non-normalized) with respect to mistakes : ',E_min2,' ; with mistakes : ', missed_min2
+    filename='h1'+str(h1)+'R'+str(rho)+'M'+str(mu)+'run'+str(run)
+    np.save('results/mlp/ET_'+filename,Errors_train)
+    np.save('results/mlp/EV_'+filename,Errors_val)
+    np.save('results/mlp/MT_'+filename,MissedList_train)
+    np.save('results/mlp/MV_'+filename,MissedList_val)
 
 
