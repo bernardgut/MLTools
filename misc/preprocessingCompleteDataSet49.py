@@ -21,6 +21,7 @@ print 'dataset 4-9 : success'
 print A.shape
 #normalize
 N = normalize(A)
-print '4-9 : Complete : ', N.shape
+print '4-9 : Complete : ', N.shape,L.shape
 #save to disk
 np.save('../mnist/n_MNIST_Complete49',N)
+np.save('../mnist/n_MNIST_Complete49_Label',L)
