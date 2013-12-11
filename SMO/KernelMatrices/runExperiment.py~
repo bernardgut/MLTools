@@ -1,0 +1,40 @@
+import numpy as np
+####Parameters
+tau = 10e-8
+tauGaussian = 10e-5
+C = 10e-5
+threshold = 10e-15
+#little xor problem
+#X = np.matrix('(-1,-1);(1,-1);(-1,1);(1,1)')
+#V = np.matrix('(-1,-1);(1,-1);(-1,1);(1,1)')
+#T = np.matrix('(-1);(1);(1);(-1)')
+#V_l = np.matrix('(-1);(1);(1);(-1)')
+#(A,B,C,D) = split(X,T,3)
+
+A=np.load('mnist/n_MNIST_Complete49.npy')
+L=np.load('mnist/n_MNIST_Complete49_Label.npy')
+
+#Loop over C to seek the best one
+f = open('result.txt','w')
+f.write("(Misclassified,C,tauGaussian)\n")
+while C < 2e5 : 
+    break
+    #Loop over tau to seek the best one
+    while tauGaussian < 2e5 :
+        totalNotCorrect = 0
+        #10-fold validation
+        for i in range(0,10) :
+            print i,"eme fold", "tauGaussian", tauGaussian, "C",C
+            X,T,V,V_l = split(A,L,i)
+            totalNotCorrect = totalNotCorrect + SMO(X,T,V,V_l,tau,tauGaussian,C,allK[i],allKtest[i])
+        totalNotCorrect = totalNotCorrect / 10
+        message = totalNotCorrect,C,tauGaussian
+        currentresult = str(message)
+        f.write(currentresult)
+        f.write("\n")
+        tauGaussian = tauGaussian * 10
+        print "=================="
+    tauGaussian = 10e-5
+    C = C * 10
+    print "**********"
+f.close()
