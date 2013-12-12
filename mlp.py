@@ -1,3 +1,10 @@
+###############################################################################
+# mlp.py
+# Multi-Layer Perceptron Implementation (2 hidden layers)
+#
+# Bernard Gutermann, Vincent Robert - 06.12.2013
+###############################################################################
+
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
