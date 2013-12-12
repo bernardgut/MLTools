@@ -1,0 +1,31 @@
+import numpy as np
+
+#Generate all Kernel matrix before experiment
+def generateAllKmatrices(A,L) :
+    allK = []
+    allKtest = []
+    for i in range (0,10) :
+        X,T,V,V_l = split(A,L,i)
+        K = initK(X,X)
+        Ktest = initK(X,V)
+        np.save("K_" + str(i), K)
+        np.save('Ktest_' + str(i), Ktest)
+    return (allK,allKtest)
+
+#Load big training dataset
+A=np.load('../mnist/n_MNIST_Complete49.npy')
+#Load labels
+L=np.load('../mnist/n_MNIST_Complete49_Label.npy')
+
+#shuffle the data
+indexes = range(0, A.shape[0])
+random.shuffle(indexes)
+indexes = indexes[:A.shape[0]]
+A = A[indexes,:]
+L = L[indexes,:]
+
+#Save all K matrices
+generateAllKmatrices(A,L)
+#Save corresponding labels and training set
+np.save("A",A)
+np.save("L",L)
