@@ -16,19 +16,23 @@ def select_pair(F, I_low, I_up,cpt,tau) :
 #init sets
 def indexSets(Alpha,T, C) :
     indexes = range(0,Alpha.shape[0])
-    I_0 = [i for i in indexes if 0<Alpha[i,0] and Alpha[i,0]<C]
-    I_p = [i for i in indexes if (T[i,0]==1 and Alpha[i,0]==0) or (T[i,0]==-1 and Alpha[i,0]==C)]
-    I_m = [i for i in indexes if (T[i,0]==-1 and Alpha[i,0]==0) or (T[i,0]==1 and Alpha[i,0]==C)]
-    I_l, I_u = I_0 + I_m, I_0 + I_p
+    #I_0 = [i for i in indexes if 0<Alpha[i,0] and Alpha[i,0]<C]
+    I_0 = np.argwhere(np.logical_and(0 < Alpha[:,0], Alpha[:,0] < C))[:,:,0]
+    I_p = np.argwhere(np.logical_or(np.logical_and(T[:,0] == 1, Alpha[:,0] == 0), np.logical_and(T[:,0] == -1, Alpha[:,0] == C)))[:,:,0]
+    I_m = np.argwhere(np.logical_or(np.logical_and(T[:,0] == -1, Alpha[:,0] == 0), np.logical_and(T[:,0] == 1, Alpha[:,0] == C)))[:,:,0]
+    #I_p = [i for i in indexes if (T[i,0]==1 and Alpha[i,0]==0) or (T[i,0]==-1 and Alpha[i,0]==C)]
+    #I_m = [i for i in indexes if (T[i,0]==-1 and Alpha[i,0]==0) or (T[i,0]==1 and Alpha[i,0]==C)]
+    #I_l, I_u = I_0 + I_m, I_0 + I_p
+    I_l, I_u = np.vstack([I_0, I_m]), np.vstack([I_0, I_p])
     return (I_l, I_u)
 #Compute criterion
 def criterion(Alpha, T, K):
     return (0.5*np.sum(np.sum(np.multiply(np.multiply(Alpha * Alpha.T, T * T.T), K), 0), 1) - np.sum(Alpha, 0))
 #Compute prediction
 def prediction(Alpha,C,T,Ktest, K, V_l) :
-    I = np.nonzero(np.logical_and(Alpha[:,0] > 0, Alpha[:,0] < C))
-    print I
-    S = I[0][0].tolist()[0]
+    #I = np.nonzero(np.logical_and(Alpha[:,0] > 0, Alpha[:,0] < C))
+    #S = I[0][0].tolist()[0]
+    S = np.argwhere(np.logical_and(0 < Alpha[:,0], Alpha[:,0] < C))[:,:,0]
     AT = np.multiply(Alpha, T)
     Y = (AT.T * K).T
     b = np.sum(T - Y) / np.size(S)
@@ -39,7 +43,8 @@ def SMO (X,T,V,V_l,tau,tauGaussian,C,threshold,K,Ktest) :
     d = X.shape[1]
     n = X.shape[0]  
     F = np.matrix(-T, dtype=float)
-    Alpha = np.asmatrix(np.zeros((n,1)))
+    Alpha = np.mat(np.zeros((n,1)))
+    T = np.mat(T)
     (I_low, I_up) = indexSets(Alpha, T, C)
     BestAlpha = Alpha
     cpt = 0

@@ -10,7 +10,7 @@ def removeOldMatrices() :
     dirpath = "./Matrices"
     filelist = [ f for f in os.listdir(dirpath)]
     for f in filelist:
-         os.remove(dirPath+"/"+fileName)
+         os.remove(dirpath+"/"+f)
 
 #Initialize the kernel matrix
 def initK(X,Y,tauGaussian) :

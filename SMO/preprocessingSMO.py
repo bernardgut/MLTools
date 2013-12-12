@@ -9,9 +9,11 @@ L=np.load('../mnist/n_MNIST_Complete49_Label.npy')
 #shuffle the data
 indexes = range(0, A.shape[0])
 random.shuffle(indexes)
-indexes = indexes[:1000]
+#indexes = indexes[:100]
 A = A[indexes,:]
 L = L[indexes,:]
+print "A : ",A.shape
+print "L : ",L.shape
 #Save corresponding labels and training set
 np.save("./Data_Label/A",A)
 np.save("./Data_Label/L",L)
