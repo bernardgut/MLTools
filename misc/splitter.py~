@@ -19,23 +19,4 @@ def split(A, L, proportion=2.0/3.0) :
     V_l = L[indexes[i:]]
     print V_l
     return (np.matrix(T), np.matrix(T_l), np.matrix(V), np.matrix(V_l))
-
-def splitDataLabel(A, L, proportion=2.0/3.0) :
-    random.seed()
-    i=0
-    j=0
-    T = list()
-    V = list()
-    T_l = list()
-    V_l = list()
-    count = A.shape[0]
-    i = int(count * proportion)
-    indexes = range(0,count)
-    random.shuffle(indexes)
-    T = A[indexes[:i]]
-    V = A[indexes[i:]]
-    T_l = L[indexes[:i]]
-    V_l = L[indexes[i:]]
-    print V_l
-    return (np.matrix(T), np.matrix(T_l), np.matrix(V), np.matrix(V_l))
     
