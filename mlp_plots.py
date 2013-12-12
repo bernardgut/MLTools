@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 PATH = 'results/mlp'
-directory = PATH+'/plots'
+directory = PATH+'/plots/exp1'
 
 #plot         
 def plotSingleCase(missed_train, missed_validation, error_train, error_validation, params) :
