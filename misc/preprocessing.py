@@ -68,5 +68,15 @@ N,_,__ = normalize(A, tmax, tmin)
 #split data
 print '4-9 :Test set : ', N.shape, ' l : ',L.shape,' max :',tmax,' min', tmin
 #save to disk
+<<<<<<< HEAD
 np.save('../mnist/n_MNIST_Test49',V)
 np.save('../mnist/n_MNIST_Test_labels49',V_l)
+=======
+V_l.shape, '\n ; writing to disk...'
+np.save('../mnist/n_MNIST_Training49',T)
+np.save('../mnist/n_MNIST_Validation49',V)
+np.save('../mnist/n_MNIST_Training_labels49',T_l)
+np.save('../mnist/n_MNIST_Validation_labels49',V_l)
+np.save('../mnist/n_MNIST_Complete_labels49', L)
+np.save('../mnist/n_MNIST_Complete49',N)
+>>>>>>> 656262ed60116ef3a496ec66524707f4c952aabd
