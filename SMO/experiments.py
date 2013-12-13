@@ -45,6 +45,7 @@ def generateAllMatrices(T_d,V_d,tauGaussian) :
         np.save("./Matrices/Ktest_" + str(tauGaussian) + "_" + str(i), Ktest)
         print 'generated matrices for fold #', i
 
+"""
 T_d = list()
 T_l = list()
 V_d = list()
@@ -53,7 +54,7 @@ for i in range(0,10) :
     T_d.append(np.load("./Data_Label/T_d_"+ str(i) + ".npy"))
     T_l.append(np.load("./Data_Label/T_l_"+ str(i) + ".npy"))
     V_d.append(np.load("./Data_Label/V_d_"+ str(i) + ".npy"))
-    V_l.append(np.load("./Data_Label/V_l_"+ str(i) + ".npy"))
+    V_l.append(np.load("./Data_Label/V_l_"+ str(i) + ".npy"))"""
 
 #initialization
 tau = 10e-8
@@ -64,16 +65,26 @@ cSet = [5]
 #tauGaussian = 10e-3
 #C = 10e-2
 threshold = 10e-15
-"""
-X = np.matrix("(-1,-1);(-1,1);(1,-1);(1,1)")
-T = np.matrix("(-1),(1),(1),(-1)")
-V = np.matrix("(-1,-1);(-1,1);(1,-1);(1,1)")
-V_l = np.matrix("(-1),(1),(1),(-1)")
-K = initK(X,X,tauGaussian=0.1)
-Ktest = initK(X,V,tauGaussian=0.1)
-print newSMO.SMO(X,T.T,V,V_l.T,tau,0.1,5,threshold,K,Ktest)"""
+Xtest = np.mat(np.load("../mnist/n_MNIST_Test49.npy"))
+Ttest = np.mat(np.load("../mnist/n_MNIST_Test_labels49.npy"))
+X = np.mat(np.load("../mnist/n_MNIST_Complete49.npy"))
+T = np.mat(np.load("../mnist/n_MNIST_Complete49_Label.npy"))
+#TestLabel = initK(X,tauGaussian=0.1)
+#Ktest = initK(X,V,tauGaussian=0.1)
 
-for tauGaussian in tauSet :
+print Ttest.shape
+print Xtest.shape
+print X.shape
+print T.shape
+
+K = initK(X,tauGaussian=0.1)
+print "K generated"
+Ktest = initK(X,Xtest,tauGaussian=0.1)
+print "Ktest generated"
+Alpha = newSMO.SMO(X,T,Xtest,Ttest,tau,0.1,5.,threshold,K,Ktest)
+print Alpha.shape
+print newSMO.prediction(Alpha,5.,T,Ktest, K, Ttest)
+"""for tauGaussian in tauSet :
     generateAllMatrices(T_d,V_d,tauGaussian)
     for C in cSet :
         nbError = 0
@@ -87,4 +98,4 @@ for tauGaussian in tauSet :
         #f = open("./Result2/result_" + str(tauGaussian) + "_" +str(C),"w")
         #f.write(str(nbError))
         #f.close()
-    removeOldMatrices()
+    removeOldMatrices()"""

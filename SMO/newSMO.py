@@ -1,11 +1,12 @@
 import numpy as np
+import math
 
 #Select the most violated pair
 def select_pair(F, I_low, I_up,cpt,tau) :
     ma = np.amax(F[I_low])
     mi = np.amin(F[I_up])
-    #if cpt % 100 == 0:
-    #    print math.log(ma - mi,10)
+    if cpt % 20 == 0:
+        print math.log(ma - mi,10)
     i_low = np.argwhere(F == ma).flat[0]
     i_up = np.argwhere(F == mi).flat[0]
     #Check for optimality
@@ -50,8 +51,10 @@ def SMO (X,T,V,V_l,tau,tauGaussian,C,threshold,K,Ktest) :
     cpt = 0
     bestcpt = 0
     minError = 1000
-    while cpt < 500 :
+    while cpt < 5000 :
         cpt = cpt + 1
+        if cpt % 20 == 0 :
+            print "Criterion "+str(criterion(BestAlpha, T, K))
         (i,j) = select_pair(F, I_low, I_up,cpt,tau)
         if j == -1 :
             break
@@ -89,12 +92,12 @@ def SMO (X,T,V,V_l,tau,tauGaussian,C,threshold,K,Ktest) :
         #Update alpha
         Alpha[i,0] = alpha_new_i
         Alpha[j,0] = alpha_new_j
-        error = prediction(Alpha,C,T,Ktest, K, V_l)
+        """error = prediction(Alpha,C,T,Ktest, K, V_l)
         if error < minError :
             minError = error
             bestcpt = cpt
-            BestAlpha = Alpha
+            BestAlpha = Alpha"""
         (I_low, I_up) = indexSets(Alpha,T, C)
-    finalError = prediction(BestAlpha,C,T,Ktest, K, V_l)
-    print "Error: ",finalError, " at count ", bestcpt, "criterion of", criterion(BestAlpha, T, K)
-    return finalError
+    #finalError = prediction(BestAlpha,C,T,Ktest, K, V_l)
+    #print "Error: ",finalError, " at count ", bestcpt, "criterion of", str(criterion(BestAlpha, T, K))
+    return Alpha
