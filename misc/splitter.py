@@ -17,7 +17,6 @@ def split(A, L, proportion=2.0/3.0) :
     V = A[indexes[i:]]
     T_l = L[indexes[:i]]
     V_l = L[indexes[i:]]
-    print V_l
     return (np.matrix(T), np.matrix(T_l), np.matrix(V), np.matrix(V_l))
 
 def splitDataLabel(A, L, proportion=2.0/3.0) :
