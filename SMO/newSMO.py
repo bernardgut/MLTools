@@ -16,19 +16,15 @@ def select_pair(F, I_low, I_up,cpt,tau) :
 
 #init sets
 def indexSets(Alpha,T, C) :
-    indexes = range(0,Alpha.shape[0])
-    #I_0 = [i for i in indexes if 0<Alpha[i,0] and Alpha[i,0]<C]
     I_0 = np.argwhere(np.logical_and(0 < Alpha[:,0], Alpha[:,0] < C))[:,:,0]
     I_p = np.argwhere(np.logical_or(np.logical_and(T[:,0] == 1, Alpha[:,0] == 0), np.logical_and(T[:,0] == -1, Alpha[:,0] == C)))[:,:,0]
     I_m = np.argwhere(np.logical_or(np.logical_and(T[:,0] == -1, Alpha[:,0] == 0), np.logical_and(T[:,0] == 1, Alpha[:,0] == C)))[:,:,0]
-    #I_p1 = [i for i in indexes if (T[i,0]==1 and Alpha[i,0]==0) or (T[i,0]==-1 and Alpha[i,0]==C)]
-    #I_m1 = [i for i in indexes if (T[i,0]==-1 and Alpha[i,0]==0) or (T[i,0]==1 and Alpha[i,0]==C)]
-    #I_l, I_u = I_0 + I_m, I_0 + I_p
     I_l, I_u = np.vstack([I_0, I_m]), np.vstack([I_0, I_p])
     return (I_l, I_u)
 #Compute criterion
 def criterion(Alpha, T, K):
     return (0.5*np.sum(np.sum(np.multiply(np.multiply(Alpha * Alpha.T, T * T.T), K), 0), 1) - np.sum(Alpha, 0))
+
 #Compute prediction
 def prediction(Alpha,C,T,Ktest, K, V_l) :
     S = np.argwhere(np.logical_and(0 < Alpha[:,0], Alpha[:,0] < C))[:,:,0]
@@ -40,18 +36,17 @@ def prediction(Alpha,C,T,Ktest, K, V_l) :
         b = np.sum(T - Y) / float(np.size(S))
     pred = (AT.T * Ktest).T - b
     return np.sum(np.multiply(pred, V_l) < 0)
+
 #SMO algorithm
-def SMO (X,T,V,V_l,tau,tauGaussian,C,threshold,K,Ktest) :
+def SMO (X,T,V,V_l,tau,tauGaussian,C,threshold,K,Ktest,iteration) :
     d = X.shape[1]
     n = X.shape[0]
-    F = np.matrix(-T, dtype=float)
+    F = np.mat(-T, dtype=float)
     Alpha = np.mat(np.zeros((n,1)))
     (I_low, I_up) = indexSets(Alpha, T, C)
     BestAlpha = Alpha
     cpt = 0
-    bestcpt = 0
-    minError = 1000
-    while cpt < 5000 :
+    while cpt < iteration :
         cpt = cpt + 1
         if cpt % 20 == 0 :
             print "Criterion "+str(criterion(BestAlpha, T, K))
@@ -92,12 +87,8 @@ def SMO (X,T,V,V_l,tau,tauGaussian,C,threshold,K,Ktest) :
         #Update alpha
         Alpha[i,0] = alpha_new_i
         Alpha[j,0] = alpha_new_j
-        """error = prediction(Alpha,C,T,Ktest, K, V_l)
-        if error < minError :
-            minError = error
-            bestcpt = cpt
-            BestAlpha = Alpha"""
         (I_low, I_up) = indexSets(Alpha,T, C)
-    #finalError = prediction(BestAlpha,C,T,Ktest, K, V_l)
-    #print "Error: ",finalError, " at count ", bestcpt, "criterion of", str(criterion(BestAlpha, T, K))
+    #finalError = prediction(Alpha,C,T,Ktest, K, V_l)
+    #print "Error: ",finalError, "criterion of", str(criterion(Alpha, T, K))
+    #return finalError
     return Alpha
