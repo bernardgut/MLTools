@@ -20,8 +20,8 @@ def indexSets(Alpha,T, C) :
     I_0 = np.argwhere(np.logical_and(0 < Alpha[:,0], Alpha[:,0] < C))[:,:,0]
     I_p = np.argwhere(np.logical_or(np.logical_and(T[:,0] == 1, Alpha[:,0] == 0), np.logical_and(T[:,0] == -1, Alpha[:,0] == C)))[:,:,0]
     I_m = np.argwhere(np.logical_or(np.logical_and(T[:,0] == -1, Alpha[:,0] == 0), np.logical_and(T[:,0] == 1, Alpha[:,0] == C)))[:,:,0]
-    #I_p = [i for i in indexes if (T[i,0]==1 and Alpha[i,0]==0) or (T[i,0]==-1 and Alpha[i,0]==C)]
-    #I_m = [i for i in indexes if (T[i,0]==-1 and Alpha[i,0]==0) or (T[i,0]==1 and Alpha[i,0]==C)]
+    #I_p1 = [i for i in indexes if (T[i,0]==1 and Alpha[i,0]==0) or (T[i,0]==-1 and Alpha[i,0]==C)]
+    #I_m1 = [i for i in indexes if (T[i,0]==-1 and Alpha[i,0]==0) or (T[i,0]==1 and Alpha[i,0]==C)]
     #I_l, I_u = I_0 + I_m, I_0 + I_p
     I_l, I_u = np.vstack([I_0, I_m]), np.vstack([I_0, I_p])
     return (I_l, I_u)
@@ -30,28 +30,28 @@ def criterion(Alpha, T, K):
     return (0.5*np.sum(np.sum(np.multiply(np.multiply(Alpha * Alpha.T, T * T.T), K), 0), 1) - np.sum(Alpha, 0))
 #Compute prediction
 def prediction(Alpha,C,T,Ktest, K, V_l) :
-    #I = np.nonzero(np.logical_and(Alpha[:,0] > 0, Alpha[:,0] < C))
-    #S = I[0][0].tolist()[0]
     S = np.argwhere(np.logical_and(0 < Alpha[:,0], Alpha[:,0] < C))[:,:,0]
     AT = np.multiply(Alpha, T)
     Y = (AT.T * K).T
-    b = np.sum(T - Y) / np.size(S)
+    if np.size(S) == 0 :
+        b = 0
+    else : 
+        b = np.sum(T - Y) / float(np.size(S))
     pred = (AT.T * Ktest).T - b
     return np.sum(np.multiply(pred, V_l) < 0)
 #SMO algorithm
 def SMO (X,T,V,V_l,tau,tauGaussian,C,threshold,K,Ktest) :
     d = X.shape[1]
-    n = X.shape[0]  
+    n = X.shape[0]
     F = np.matrix(-T, dtype=float)
     Alpha = np.mat(np.zeros((n,1)))
-    T = np.mat(T)
     (I_low, I_up) = indexSets(Alpha, T, C)
     BestAlpha = Alpha
     cpt = 0
     bestcpt = 0
     minError = 1000
     while cpt < 500 :
-        cpt = cpt + 1 
+        cpt = cpt + 1
         (i,j) = select_pair(F, I_low, I_up,cpt,tau)
         if j == -1 :
             break
@@ -66,7 +66,7 @@ def SMO (X,T,V,V_l,tau,tauGaussian,C,threshold,K,Ktest) :
         alpha_new_j = 0
         rho = K[i,i] + K[j,j] - 2*K[i,j]
         if rho > threshold :
-            alpha_unc = Alpha[j,0] + (T[j,0] * (F[i,0] - F[j,0]) / rho)
+            alpha_unc = Alpha[j,0] + (T[j,0] * (F[i,0] - F[j,0]) / float(rho))  
             if alpha_unc >= L and alpha_unc <= H :
                alpha_new_j = alpha_unc
             if alpha_unc < L :
