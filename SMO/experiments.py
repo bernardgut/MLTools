@@ -57,24 +57,34 @@ for i in range(0,10) :
 
 #initialization
 tau = 10e-8
-tauGaussian = 10e-4
-C = 10e-2
+#tauSetPrecise = [0.05,0.07,0.09,0.1,0.11,0.12,0.15]
+#cSetPrecise = [1,3,5,7,9,10]
+tauSet = [0.1]
+cSet = [5]
+#tauGaussian = 10e-3
+#C = 10e-2
 threshold = 10e-15
-while tauGaussian < 10e3 :
-    break
+"""
+X = np.matrix("(-1,-1);(-1,1);(1,-1);(1,1)")
+T = np.matrix("(-1),(1),(1),(-1)")
+V = np.matrix("(-1,-1);(-1,1);(1,-1);(1,1)")
+V_l = np.matrix("(-1),(1),(1),(-1)")
+K = initK(X,X,tauGaussian=0.1)
+Ktest = initK(X,V,tauGaussian=0.1)
+print newSMO.SMO(X,T.T,V,V_l.T,tau,0.1,5,threshold,K,Ktest)"""
+
+for tauGaussian in tauSet :
     generateAllMatrices(T_d,V_d,tauGaussian)
-    while C < 10e4 :
+    for C in cSet :
         nbError = 0
         for i in range(0,10) :
             K = np.mat(np.load("./Matrices/K_" + str(tauGaussian) + "_" +str(i) + ".npy"))
             Ktest = np.mat(np.load("./Matrices/Ktest_" + str(tauGaussian) + "_" +str(i) + ".npy"))
             nbError = nbError + newSMO.SMO(np.mat(T_d[i]),np.mat(T_l[i]),np.mat(V_d[i]),np.mat(V_l[i]),tau,tauGaussian,C,threshold,K,Ktest)
             print "i,tauGaussian,C,error",i,tauGaussian,C,nbError
-        nbError = nbError / 10
-        f = open("./Result/result_" + str(tauGaussian) + "_" +str(C),"w")
-        f.write(str(nbError))
-        f.write(nbError)
-        f.close()
-        C = C * 10
+        nbError = nbError / 10.
+        print "average error : ", nbError
+        #f = open("./Result2/result_" + str(tauGaussian) + "_" +str(C),"w")
+        #f.write(str(nbError))
+        #f.close()
     removeOldMatrices()
-    tauGaussian = tauGaussian * 10
