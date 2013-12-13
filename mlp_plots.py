@@ -18,13 +18,13 @@ def plotSingleCase(missed_train, missed_validation, error_train, error_validatio
     missed_validation = np.asarray(missed_validation)
     error_train = np.asarray(error_train)
     error_validation=np.asarray(error_validation)
-
-    plt.plot(x, missed_train[0], 'blue') 
-    plt.plot(x, missed_validation[0], 'green')
+    
+    plt.plot(x, missed_train[0]/2000., 'blue') 
+    plt.plot(x, missed_validation[0]/2000., 'green')
     plt.legend(['Training Set', 'Validation Set'])
-    plt.ylabel('Classification Mistakes')
+    plt.ylabel('Classification Mistakes [%]')
     plt.xlabel('Epoch')
-    plt.axis([0,30,0,500])
+    plt.axis([0,30,0,500./2000.])
     plt.title('MLP : h1:'+str(params[0])+' eta:'+str(params[1])+' mu:'+str(params[2]))    
     filename = directory+'/M_H'+str(params[0])+'R'+str(params[1])+'M'+str(params[2])
     #plt.show()
@@ -40,6 +40,39 @@ def plotSingleCase(missed_train, missed_validation, error_train, error_validatio
     plt.title('MLP : h1:'+str(params[0])+' eta:'+str(params[1])+' mu:'+str(params[2]))
     filename = directory+'/E_H'+str(params[0])+'R'+str(params[1])+'M'+str(params[2])
     plt.savefig(filename+'.png')
+    plt.close()
+#plot         
+def plotMultiCase(missed_train, missed_validation, error_train, error_validation, params) :
+    x = range(0,30)
+    
+    missed_train = np.asarray(missed_train)/2000.
+    missed_validation = np.asarray(missed_validation)/2000.
+    error_train = np.asarray(error_train)
+    error_validation=np.asarray(error_validation)
+    
+    plt.plot(x, np.mean( missed_train, axis=0), color='blue') 
+    plt.plot(x, np.mean(missed_validation, axis=0), color='green')
+    plt.legend(['Training Set', 'Validation Set'])
+    plt.ylabel('Classification Mistakes [%]')
+    plt.xlabel('Epoch')
+    plt.axis([0,30,0,500./2000.])
+    plt.title('MLP : h1:'+str(params[0])+' eta:'+str(params[1])+' mu:'+str(params[2]))    
+    filename = directory+'/M_H'+str(params[0])+'R'+str(params[1])+'M'+str(params[2])
+    #plt.show()
+    plt.savefig(filename+'.png')
+    plt.close()
+    
+    G3 = plt.plot(x, np.mean(error_train,axis=0), 'blue') 
+    G4 = plt.plot(x, np.mean(error_validation,axis=0), 'green')
+    plt.legend(['Training Set', 'Validation Set'])
+    plt.ylabel('Logistic Error')
+    plt.xlabel('Epoch')
+    plt.axis([0,30,0.,0.4])
+    plt.title('MLP : h1:'+str(params[0])+' eta:'+str(params[1])+' mu:'+str(params[2]))
+    filename = directory+'/E_H'+str(params[0])+'R'+str(params[1])+'M'+str(params[2])
+    plt.savefig(filename+'.png')
+
+
 
 #select files of interest and plot
 def parsePlot(fileiter, test):
@@ -68,7 +101,8 @@ def parsePlot(fileiter, test):
                     error_validation.append(np.load(f))
                     print 'error val : ',f
                 
-    plotSingleCase(missed_train, missed_validation, error_train, error_validation, test)
+    #plotSingleCase(missed_train, missed_validation, error_train, error_validation, test)
+    plotMultiCase(missed_train, missed_validation, error_train, error_validation, test)
 
 #Experiments
 H = [2,10,40,50,60]
@@ -87,11 +121,13 @@ for f in fileiter :
 if not os.path.exists(directory):
         os.makedirs(directory)
 #save plots
+"""
 for h1 in range(0,len(H)) :
     for eta in range(0,len(ETA)) : 
         for mu in range(0,len(MU)) :
             print 'saving plot : h1',H[h1],'R', ETA[eta],'MU', MU[mu]
             test = [H[h1], ETA[eta], MU[mu]]
             parsePlot(Files, test)
-#test = [H[0], ETA[0], MU[0]]
-#parsePlot(fileiter, test)
+"""
+test = [50 , 0.05, 0.2]
+parsePlot(Files, test)

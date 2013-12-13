@@ -27,23 +27,23 @@ def multiRunOptimal():
     Mistakes = list()
     
     e = 0
-    for i in range(0,10) :
+    for i in range(0,20) :
         print 'Begin iteration ',i
         W = mlp.run(50,0.05,0.2,i)
-        (E, M) = mlp.test(X,L,W)
+        #(E, M) = mlp.test(X,L,W)
         
-        Error.append(E)
-        Mistakes.append(M)
+        #Error.append(E)
+        #Mistakes.append(M)
         
         e=e+1
-        print 'test error :\t',E
-        print 'test mistakes :\t',M
+        #print 'test error :\t',E
+        #print 'test mistakes :\t',M
     
     #save
-    print 'Saving Error trace : ', Error
-    print 'Saving Mistakes trace : ',Mistakes
-    np.save(PATH+'/result_E3',np.asarray(Error))
-    np.save(PATH+'/result_M3',np.asarray(Mistakes)) 
+    #print 'Saving Error trace : ', Error
+    #print 'Saving Mistakes trace : ',Mistakes
+    #np.save(PATH+'/result_E2',np.asarray(Error))
+    #np.save(PATH+'/result_M2',np.asarray(Mistakes)) 
 
 def affineSearch():
     e = 0
@@ -55,5 +55,5 @@ def affineSearch():
                 print '###END EXPERIMENT : ',e,' : h1=',H[h1],' eta=',ETA[eta],' mu=',MU[mu]
                 e=e+1
                 
-affineSearch()
-#multiRunOptimal()
+#affineSearch()
+multiRunOptimal()
