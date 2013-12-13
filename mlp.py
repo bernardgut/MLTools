@@ -196,7 +196,7 @@ def mlp_train(X1, T1, W=0) :
     #end train phase for epoch
     return (W, E/X1.shape[0], count)
 
-#################################
+#############################################################################
 
 ###RUN SCRIPT###
 def run(_h1=15, _eta=0.01, _mu=0.6,run=0, debug=0) : 
@@ -204,25 +204,21 @@ def run(_h1=15, _eta=0.01, _mu=0.6,run=0, debug=0) :
     init(_h1, _eta, _mu, debug)
     
     #load data
+    """
     T1_d=np.load('mnist/n_MNIST_Training35.npy')
     T1_l=np.load('mnist/n_MNIST_Training_labels35.npy')
     V1_d=np.load('mnist/n_MNIST_Validation35.npy')
     V1_l=np.load('mnist/n_MNIST_Validation_labels35.npy')
-
-    T2_d=np.load('mnist/n_MNIST_Training49.npy')
-    T2_l=np.load('mnist/n_MNIST_Training_labels49.npy')
-    V2_d=np.load('mnist/n_MNIST_Validation49.npy')
-    V2_l=np.load('mnist/n_MNIST_Validation_labels49.npy')
-
-    #adjust labels to [0-1] (T tilda)
-    T1_l=adjustLabels(T1_l)
-    V1_l=adjustLabels(V1_l)
-    T2_l=adjustLabels(T2_l)
-    V2_l=adjustLabels(V2_l)
-
     print 'load success : '
     print '3-5 : Training : ', T1_d.shape, ' l : ',T1_l.shape, ' ; Validation : ',V1_d.shape, ' l : ',V1_l.shape
-    print '4-9 : Training : ', T2_d.shape, ' l : ',T2_l.shape, ' ; Validation : ',V2_d.shape, ' l : ', V2_l.shape
+    """
+    T1_d=np.load('mnist/n_MNIST_Training49.npy')
+    T1_l=np.load('mnist/n_MNIST_Training_labels49.npy')
+    V1_d=np.load('mnist/n_MNIST_Validation49.npy')
+    V1_l=np.load('mnist/n_MNIST_Validation_labels49.npy')
+
+    print 'load success : '
+    print '4-9 : Training : ', T1_d.shape, ' l : ',T1_l.shape, ' ; Validation : ',V1_d.shape, ' l : ', V1_l.shape
     #xor problem big
     #X1 = np.load('mnist/n_XOR_Training.npy')
     #X2 = np.load('mnist/n_XOR_Validation.npy')
@@ -239,25 +235,31 @@ def run(_h1=15, _eta=0.01, _mu=0.6,run=0, debug=0) :
     print 'step size: \t\trho\t= ', rho
     print 'momentum factor: \tmu\t= ', mu
     print 'Total # hidden layers: \t|A|\t= ', 2*h1 
+    
+    #adjust labels to [0-1] (T tilda)
+    T1_l=adjustLabels(T1_l)
+    V1_l=adjustLabels(V1_l)
 
     #BEGIN
     W = 0
     W_min=0
     E_min = 999999
-    W_min2=0
-    E_min2 = 999999
     missed_min = 99999
-    missed_min2 = 99999
-
+    missed_val_min = 99999
+    
+    #Evolution of error and mistakes
     Errors_train = list()
     Errors_val = list()
     MissedList_train = list()
     MissedList_val = list()
-
+    #early stopping counters
     es_count = 0
+    ms_count = 0
+    vs_count = 0
+    
     epoch = 0
     early_s = False
-    while epoch<30 : #and early_s = False
+    while epoch<30 :#and early_s == False : 
         #randomize the order in which the data is read
         (T1_d,T1_l) = reshuffle(T1_d,T1_l)
         (V1_d,V1_l) = reshuffle(V1_d,V1_l)
@@ -276,34 +278,52 @@ def run(_h1=15, _eta=0.01, _mu=0.6,run=0, debug=0) :
         print 'epoch ',epoch,' , train error E =', E_train,' mistakes : ',missed_train
         print 'epoch ',epoch,' , validation error E =', E_val,' - delta :', E_val-E_min,' mistakes : ',missed_val
         
-        #early stopping, only after the first epoch, it can be that you go in the wrond dir at start
-        #we allow the algorithm to go up sparsely, in a moving average fashion
-        #note that we want the algorithm to make as few mistakes as possible, so we count only when the number of mistakes goes up. this allows for the error to go up as long as there are less mistakes. Experimentally this was better (report)
+        ######early stopping. 
+        ######There are 3 cases on which we analyse the results: 
         
-        if E_val-E_min>0 and missed_val>missed_min and epoch>0 : 
-            es_count=es_count+1
-        elif E_val-E_min<0 :
+        #if the train mistakes increase too much in a moving average window: stop
+        #after train set is perfectly classified, continue at most 5 epochs (ms_count)
+        if missed_train<missed_min and epoch >1 :
+            missed_min = missed_train      
+            if ms_count>0 : ms_count = ms_count - 1
+            #we just reached 0 errors on the train set : save (see paper)
+            if missed_train == 0 :
+                print 'epoch ',epoch,' , saved W_min'
+                W_min = W
+                E_min = E_val   
+        else :
+            ms_count = ms_count + 1
+     
+        #if the error increases to much in a moving average window : stop
+        if E_val<=E_min and epoch>0:            
+            if es_count>0 : es_count = es_count - 1 
+            
+            #the error is lower : save
+            print 'epoch ',epoch,' , saved W_min'
             W_min = W
-            E_min = E_val
-            missed_min = missed_val
-            if es_count>0 : es_count = es_count - 1 
-        elif missed_val<missed_min2 :
-            missed_min2=missed_val
-            W_min2 = W
-            E_min2 = E_val
-            if es_count>0 : es_count = es_count - 1 
-        elif missed_val==missed_min2 :
-            if E_val<E_min2 :
-                W_min2 = W
-                E_min2 = E_val
-                if es_count>0 : es_count = es_count - 1 
-        if es_count >= 5 : early_s = True 
+            E_min = E_val    
+        else :
+            es_count = es_count + 1
+        
+        #if the validation mistakes increase too much in a moving average window: stop        
+        if missed_val<=missed_val_min :
+            missed_val_min = missed_val    
+            if vs_count>0 : vs_count = vs_count - 1
+        else :
+            vs_count = vs_count + 1
+        
+        #Stop conditions    
+        if ms_count>=5 or es_count>10 or vs_count>=5:
+            early_s = True
+        
+        #state of stop counters
+        print 'epoch ',epoch,' , stop counters :(MT,MV,E)=(',ms_count,'/5,',vs_count,'/5,',es_count,'/10)'
+        
         #go to the next epoch
         epoch = epoch + 1
 
     #show and save results
-    print 'best validation error (non-normalized) : ', E_min,' ; with mistakes : ', missed_min
-    print 'best validation error (non-normalized) with respect to mistakes : ',E_min2,' ; with mistakes : ', missed_min2
+    print 'best validation error (non-normalized) : ', E_min,' ; with training mistakes : ', missed_min
     
     directory='h'+str(h1)+'R'+str(rho)+'M'+str(mu)
     directory='results/mlp/'+directory
@@ -314,8 +334,17 @@ def run(_h1=15, _eta=0.01, _mu=0.6,run=0, debug=0) :
     np.save(directory+'/EV_'+str(run), np.array(Errors_val))
     np.save(directory+'/MT_'+str(run), np.array(MissedList_train))
     np.save(directory+'/MV_'+str(run), np.array(MissedList_val))
+
+    return W_min
+
+############################################################################
+def test(X,T,W):
+    #adjust labels to [0-1] (T tilda)
+    T_l=adjustLabels(T)
+    #Test results for this min on test set
+    return mlp_validation(X,T_l,W)
     
-###########################################################################
-#run()
+############################################################################
+run()
 
 

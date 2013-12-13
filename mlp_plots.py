@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 PATH = 'results/mlp'
-directory = PATH+'/plots/exp1'
+directory = PATH+'/plots/exp49'
 
 #plot         
 def plotSingleCase(missed_train, missed_validation, error_train, error_validation, params) :
@@ -50,29 +50,30 @@ def parsePlot(fileiter, test):
     error_validation = list()
 
     for f in fileiter :
-        match = re.search(r'results/(\w+)/h(\d+)R([0-9\.]+)M([0-9\.]+)/(\w)(\w)_(\d+).npy', f)
-        tpe, h1, rho, mu, status, tset, count = match.groups()  
-        #select pertinants 
-        if tpe == 'mlp' and int(h1) == test[0] and float(rho) == test[1] and float(mu) == test[2] :
-            if status == 'M' and tset == 'T' : 
-                missed_train.append(np.load(f))
-                print 'missed train : ',f
-            if status == 'M' and tset == 'V' : 
-                missed_validation.append(np.load(f))
-                print 'missed val : ',f
-            if status == 'E' and tset == 'T' : 
-                error_train.append(np.load(f))
-                print 'error train : ',f
-            if status == 'E' and tset == 'V' : 
-                error_validation.append(np.load(f))
-                print 'error val : ',f
+        match = re.search(r'/mlp/h(\d+)R([0-9\.]+)M([0-9\.]+)/(\w)(\w)_(\d+).npy', f)
+        if match!=None :
+            h1, rho, mu, status, tset, count = match.groups()  
+            #select pertinants 
+            if int(h1) == test[0] and float(rho) == test[1] and float(mu) == test[2] :
+                if status == 'M' and tset == 'T' : 
+                    missed_train.append(np.load(f))
+                    print 'missed train : ',f
+                if status == 'M' and tset == 'V' : 
+                    missed_validation.append(np.load(f))
+                    print 'missed val : ',f
+                if status == 'E' and tset == 'T' : 
+                    error_train.append(np.load(f))
+                    print 'error train : ',f
+                if status == 'E' and tset == 'V' : 
+                    error_validation.append(np.load(f))
+                    print 'error val : ',f
                 
     plotSingleCase(missed_train, missed_validation, error_train, error_validation, test)
 
 #Experiments
-H = [2,5,15,50]
-ETA = [0.1, 0.01, 0.001, 0.0001]
-MU = [0.,0.2,0.4,0.6,0.8]
+H = [2,10,40,50,60]
+ETA = [0.07,0.05,0.03, 0.01, 0.005]
+MU = [0,0.1,0.2,0.4,0.6,0.7]
 
 #recover all files
 fileiter = (os.path.join(root, f)

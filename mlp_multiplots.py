@@ -8,7 +8,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 
-PATH = 'results/mlp/plots/multi'
+PATH = 'results/mlp'
 directory = 'results/mlp/plots/multi_plots'
 
 #plot         
@@ -84,33 +84,34 @@ def plotSingleCase(missed_train, missed_validation, error_train, error_validatio
 def parsePlot(fileiter, test):
 
     for f in fileiter :
-        match = re.search(r'/h(\d+)R([0-9\.]+)M([0-9\.]+)/(\w)(\w)_(\d+).npy', f)
-        h1, rho, mu, status, tset, count = match.groups()  
+        match = re.search(r'/mlp/h(\d+)R([0-9\.]+)M([0-9\.]+)/(\w)(\w)_(\d+).npy', f)
+        
         #select pertinants 
-        if int(h1) == test[0] and float(rho) == test[1] and float(mu) == test[2] :
-            print 'OK'
-            if status == 'M' and tset == 'T' : 
-                missed_train.append(np.load(f))
-                params_MT.append(test)
-                print 'missed train : ',f
-            if status == 'M' and tset == 'V' : 
-                missed_validation.append(np.load(f))
-                params_MV.append(test)
-                print 'missed val : ',f
-            if status == 'E' and tset == 'T' : 
-                error_train.append(np.load(f))
-                params_ET.append(test)
-                print 'error train : ',f
-            if status == 'E' and tset == 'V' : 
-                error_validation.append(np.load(f))
-                params_EV.append(test)
-                print 'error val : ',f
-                
+        if match!=None :
+            h1, rho, mu, status, tset, count = match.groups()  
+            if int(h1) == test[0] and float(rho) == test[1] and float(mu) == test[2] :
+                if status == 'M' and tset == 'T' : 
+                    missed_train.append(np.load(f))
+                    params_MT.append(test)
+                    print 'missed train : ',f
+                if status == 'M' and tset == 'V' : 
+                    missed_validation.append(np.load(f))
+                    params_MV.append(test)
+                    print 'missed val : ',f
+                if status == 'E' and tset == 'T' : 
+                    error_train.append(np.load(f))
+                    params_ET.append(test)
+                    print 'error train : ',f
+                if status == 'E' and tset == 'V' : 
+                    error_validation.append(np.load(f))
+                    params_EV.append(test)
+                    print 'error val : ',f
+                    
 
 #Experiments
-H = [2,5,15,50]
-ETA = [0.1, 0.01, 0.001, 0.0001]
-MU = [0.,0.2,0.4,0.6,0.8]
+H = [40,50,60]
+ETA = [0.05, 0.01, 0.005]
+MU = [0,0.1,0.2]
 
 #recover all files
 fileiter = (os.path.join(root, f)
