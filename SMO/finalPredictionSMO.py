@@ -23,6 +23,10 @@ K = KernelComputation.initK(X,tauGaussian=0.09)
 print "K generated"
 Ktest = KernelComputation.initK(X,Xtest,tauGaussian=0.09)
 print "Ktest generated"
-Alpha = newSMO.SMO(X,T,Xtest,Ttest,tau,0.09,3.,threshold,K,Ktest,10000)
+Alpha = newSMO.SMO(X,T,Xtest,Ttest,tau,0.09,3.,threshold,K,Ktest,5000)
 print Alpha.shape
-print "Final number of error : ",newSMO.prediction(Alpha,3.,T,Ktest, K, Ttest)
+pred = newSMO.prediction(Alpha,3.,T,Ktest, K, Ttest)
+print "Final number of error : ",newSMO.getError(pred,Ttest)
+missclassified = newSMO.getIndexMissclassified(pred,Ttest)
+print "Index of class 1 ",missclassified[0]
+print "index of class 2 ",missclassified[1]

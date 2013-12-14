@@ -25,6 +25,10 @@ def indexSets(Alpha,T, C) :
 def criterion(Alpha, T, K):
     return (0.5*np.sum(np.sum(np.multiply(np.multiply(Alpha * Alpha.T, T * T.T), K), 0), 1) - np.sum(Alpha, 0))
 
+#Get the index of the missclassified element
+def getIndexMissclassified(pred,V_l) :
+     return (np.argwhere(np.logical_and(pred[:,0] > 0., V_l[:,0] < 0.))[:,:,0], np.argwhere(np.logical_and(pred[:,0] < 0., V_l[:,0] > 0.))[:,:,0])
+
 #Compute prediction
 def prediction(Alpha,C,T,Ktest, K, V_l) :
     S = np.argwhere(np.logical_and(0 < Alpha[:,0], Alpha[:,0] < C))[:,:,0]
@@ -35,6 +39,11 @@ def prediction(Alpha,C,T,Ktest, K, V_l) :
     else : 
         b = np.sum(T - Y) / float(np.size(S))
     pred = (AT.T * Ktest).T - b
+    return pred    
+    #return np.sum(np.multiply(pred, V_l) < 0)
+
+#Compute the number of error
+def getError(pred,V_l) :
     return np.sum(np.multiply(pred, V_l) < 0)
 
 #SMO algorithm
