@@ -15,13 +15,13 @@ H = [2,10,40,50,60]
 ETA = [0.07,0.05,0.03, 0.01, 0.005]
 MU = [0,0.1,0.2,0.4,0.6,0.7]
 
-PATH = 'results/mlp/test'
+PATH = '../results/mlp/test'
 if not os.path.exists(PATH):
     os.makedirs(PATH)
 
 def multiRunOptimal():
-    X=np.load('mnist/n_MNIST_Test49.npy')
-    L=np.load('mnist/n_MNIST_Test_labels49.npy')
+    X=np.load('../mnist/n_MNIST_Test49.npy')
+    L=np.load('../mnist/n_MNIST_Test_labels49.npy')
     
     Error = list()
     Mistakes = list()
@@ -55,5 +55,5 @@ def affineSearch():
                 print '###END EXPERIMENT : ',e,' : h1=',H[h1],' eta=',ETA[eta],' mu=',MU[mu]
                 e=e+1
                 
-#affineSearch()
-multiRunOptimal()
+affineSearch()
+#multiRunOptimal()

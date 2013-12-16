@@ -213,10 +213,10 @@ def run(_h1=15, _eta=0.01, _mu=0.6,run=0, debug=0) :
     print '3-5 : Training : ', T1_d.shape, ' l : ',T1_l.shape, ' ; Validation : ',V1_d.shape, ' l : ',V1_l.shape
     
     """
-    T1_d=np.load('mnist/n_MNIST_Training49.npy')
-    T1_l=np.load('mnist/n_MNIST_Training_labels49.npy')
-    V1_d=np.load('mnist/n_MNIST_Validation49.npy')
-    V1_l=np.load('mnist/n_MNIST_Validation_labels49.npy')
+    T1_d=np.load('../mnist/n_MNIST_Training49.npy')
+    T1_l=np.load('../mnist/n_MNIST_Training_labels49.npy')
+    V1_d=np.load('../mnist/n_MNIST_Validation49.npy')
+    V1_l=np.load('../mnist/n_MNIST_Validation_labels49.npy')
 
     print 'load success : '
     print '4-9 : Training : ', T1_d.shape, ' l : ',T1_l.shape, ' ; Validation : ',V1_d.shape, ' l : ', V1_l.shape
