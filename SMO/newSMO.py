@@ -30,7 +30,7 @@ def getIndexMissclassified(pred,V_l) :
      return (np.argwhere(np.logical_and(pred[:,0] > 0., V_l[:,0] < 0.))[:,:,0], np.argwhere(np.logical_and(pred[:,0] < 0., V_l[:,0] > 0.))[:,:,0])
 
 #Compute prediction
-def prediction(Alpha,C,T,Ktest, K, V_l) :
+def prediction(Alpha,C,T,Ktest, K) :
     S = np.argwhere(np.logical_and(0 < Alpha[:,0], Alpha[:,0] < C))[:,:,0]
     AT = np.multiply(Alpha, T)
     Y = (AT.T * K).T
@@ -40,14 +40,13 @@ def prediction(Alpha,C,T,Ktest, K, V_l) :
         b = np.sum(T - Y) / float(np.size(S))
     pred = (AT.T * Ktest).T - b
     return pred    
-    #return np.sum(np.multiply(pred, V_l) < 0)
 
 #Compute the number of error
 def getError(pred,V_l) :
     return np.sum(np.multiply(pred, V_l) < 0)
 
 #SMO algorithm
-def SMO (X,T,V,V_l,tau,tauGaussian,C,threshold,K,Ktest,iteration) :
+def SMO (X,T,tau,tauGaussian,C,threshold,K,iteration) :
     d = X.shape[1]
     n = X.shape[0]
     F = np.mat(-T, dtype=float)

@@ -30,11 +30,15 @@ for tauGaussian in tauSetPrecise :
         for i in range(0,10) :
             K = np.mat(np.load("./Matrices/K_" + str(tauGaussian) + "_" +str(i) + ".npy"))
             Ktest = np.mat(np.load("./Matrices/Ktest_" + str(tauGaussian) + "_" +str(i) + ".npy"))
-            nbError = nbError + newSMO.SMO(np.mat(T_d[i]),np.mat(T_l[i]),np.mat(V_d[i]),np.mat(V_l[i]),tau,tauGaussian,C,threshold,K,Ktest,500)
+            Alpha = newSMO.SMO(np.mat(T_d[i]),np.mat(T_l[i]),tau,tauGaussian,C,threshold,K,500)
+            pred = newSMO.prediction(Alpha,C,np.mat(T_l[i]),Ktest, K)
+            error = newSMO.getError(pred,np.mat(V_l[i]))
+            print "Final number of error : ",error
+            nbError = nbError + error            
             print "i,tauGaussian,C,error",i,tauGaussian,C,nbError
         nbError = nbError / 10.0
         print "average error : ", nbError
-        f = open("./ResultPrecis2/result_" + str(tauGaussian) + "_" +str(C),"w")
+        """f = open("./ResultPrecis2/result_" + str(tauGaussian) + "_" +str(C),"w")
         f.write(str(nbError))
-        f.close()
+        f.close()"""
     KernelComputation.removeOldMatrices()
