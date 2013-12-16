@@ -26,10 +26,10 @@ N, tmax, tmin = normalize(A)
 (T, T_l, V, V_l)=splitter.split(N, L)
 print '3-5 : Training.training : ', T.shape, ' l : ',T_l.shape, ' ; Training.validation : ',V.shape, ' l : ', ' max :',tmax,' min', tmin 
 #save to disk
-#np.save('../mnist/n_MNIST_Training35',T)
-#np.save('../mnist/n_MNIST_Validation35',V)
-#np.save('../mnist/n_MNIST_Training_labels35',T_l)
-#np.save('../mnist/n_MNIST_Validation_labels35',V_l)
+np.save('../mnist/n_MNIST_Training35',T)
+np.save('../mnist/n_MNIST_Validation35',V)
+np.save('../mnist/n_MNIST_Training_labels35',T_l)
+np.save('../mnist/n_MNIST_Validation_labels35',V_l)
 
 #load test data
 (A,L)=loader.loadTestSet_35()
@@ -54,10 +54,10 @@ N, tmax, tmin = normalize(A)
 (T, T_l, V, V_l)=splitter.split(N, L)
 print '4-9 : Training.training : ', T.shape, ' l : ',T_l.shape, ' ; Training.validation : ',V.shape, ' l : ', ' max :',tmax,' min', tmin 
 #save to disk
-#np.save('../mnist/n_MNIST_Training49',T)
-#np.save('../mnist/n_MNIST_Validation49',V)
-#np.save('../mnist/n_MNIST_Training_labels49',T_l)
-#np.save('../mnist/n_MNIST_Validation_labels49',V_l)
+np.save('../mnist/n_MNIST_Training49',T)
+np.save('../mnist/n_MNIST_Validation49',V)
+np.save('../mnist/n_MNIST_Training_labels49',T_l)
+np.save('../mnist/n_MNIST_Validation_labels49',V_l)
 
 #load test data
 (A,L)=loader.loadTestSet_49()
@@ -71,12 +71,4 @@ print '4-9 :Test set : ', N.shape, ' l : ',L.shape,' max :',tmax,' min', tmin
 
 np.save('../mnist/n_MNIST_Test49',N)
 np.save('../mnist/n_MNIST_Test_labels49',L)
-
-#np.save('../mnist/n_MNIST_Training49',T)
-#np.save('../mnist/n_MNIST_Validation49',V)
-#np.save('../mnist/n_MNIST_Training_labels49',T_l)
-#np.save('../mnist/n_MNIST_Validation_labels49',V_l)
-
-#np.save('../mnist/n_MNIST_Complete_labels49', L)
-#np.save('../mnist/n_MNIST_Complete49',N)
 

@@ -21,11 +21,11 @@ import os
 _debug = 0
 ##ALGO PARAMETERS##
 #no of hidden nodes [1:inf]
-h1 = 15
+h1 = 100
 #step size [0:1]
-rho = 0.01
+rho = 0.05
 #momentum factor [0:1]
-mu = 0.6
+mu = 0.2
 
 #Algorithm parameters initialisation
 def init(_h1, _rho, _mu, debug) :
@@ -199,7 +199,7 @@ def mlp_train(X1, T1, W=0) :
 #############################################################################
 
 ###RUN SCRIPT###
-def run(_h1=15, _eta=0.01, _mu=0.6,run=0, debug=0) : 
+def run(_h1=50, _eta=0.05, _mu=0.2,run=0, debug=0) : 
     #alogorithm param init
     init(_h1, _eta, _mu, debug)
     
@@ -326,7 +326,7 @@ def run(_h1=15, _eta=0.01, _mu=0.6,run=0, debug=0) :
         epoch = epoch + 1
 
     #show and save results
-    print 'best validation error (non-normalized) : ', E_min,' ; with training mistakes : ', missed_min
+    print 'best validation error : ', E_min,' ; with training mistakes : ', missed_min
     
     directory='h'+str(h1)+'R'+str(rho)+'M'+str(mu)
     directory='results/mlp/'+directory
@@ -348,6 +348,6 @@ def test(X,T,W):
     return mlp_validation(X,T_l,W)
     
 ############################################################################
-#run()
+run()
 
 
