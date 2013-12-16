@@ -27,7 +27,7 @@ def multiRunOptimal():
     Mistakes = list()
     
     e = 0
-    for i in range(0,20) :
+    for i in range(0,1) :
         print 'Begin iteration ',i
         W = mlp.run(50,0.05,0.2,i)
         (E, M) = mlp.test(X,L,W)
@@ -55,5 +55,5 @@ def affineSearch():
                 print '###END EXPERIMENT : ',e,' : h1=',H[h1],' eta=',ETA[eta],' mu=',MU[mu]
                 e=e+1
                 
-affineSearch()
-#multiRunOptimal()
+#affineSearch()
+multiRunOptimal()
