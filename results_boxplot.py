@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
 PATH = 'results/mlp/test'
-OPATH = PATH+'/plots/final'
+OPATH = 'results/mlp/plots/final'
 
-E1 = np.load(PATH+'/result_E2.npy')
-E2 = np.load(PATH+'/result_E3.npy')
+E1 = np.load(PATH+'/result_E4.npy')
+E2 = np.load(PATH+'/result_E5.npy')
 
 
-M1 = np.load(PATH+'/result_M2.npy')
-M2 = np.load(PATH+'/result_M3.npy')
+M1 = np.load(PATH+'/result_M4.npy')*100./1902.
+M2 = np.load(PATH+'/result_M5.npy')*100./1991.
 
 ### BOXPLOT 1
 data = [E1,E2]
@@ -67,7 +67,7 @@ for i in range(numBoxes):
 
 # Set the axes ranges and axes labels
 ax1.set_xlim(0.5, numBoxes+0.5)
-top = 0.06
+top = 0.1
 bottom = 0.
 ax1.set_ylim(bottom, top)
 xtickNames = plt.setp(ax1, xticklabels=['MLP on MNIST 3vs5' , 'MLP on MNIST 4vs9'])
@@ -87,24 +87,22 @@ for tick,label in zip(range(numBoxes),ax1.get_xticklabels()):
         color=boxColors[k])
         
         
-# Finally, add a basic legend
-plt.figtext(0.80, 0.08, 'MLP' ,
-           backgroundcolor=boxColors[0], color='black', weight='roman',
-           size='x-small')
-plt.figtext(0.80, 0.045, 'SMO',
-backgroundcolor=boxColors[1],
-           color='white', weight='roman', size='x-small')
 plt.figtext(0.80, 0.015, '*', color='white', backgroundcolor='silver',
            weight='roman', size='medium')
 plt.figtext(0.815, 0.013, ' Average Value', color='black', weight='roman',
            size='x-small')
-           
-plt.show()
+
+#save/show           
+filename = OPATH+'/comparaisonError'
+#plt.show()
+plt.savefig(filename+'.pdf')
 plt.close()
 
 #### PLT 2
-data = [M1,M2]
+data = [M1,M2, 0.9041]
 
+print 'SD MLP 3-5 :',np.std(M1)
+print 'SD MLP 4-9 :',np.std(M2)
 fig, ax1 = plt.subplots(figsize=(10,6))
 fig.canvas.set_window_title('Test Sets Results for both MLP/SMO')
 plt.subplots_adjust(left=0.075, right=0.95, top=0.9, bottom=0.25)
@@ -157,10 +155,10 @@ for i in range(numBoxes):
 
 # Set the axes ranges and axes labels
 ax1.set_xlim(0.5, numBoxes+0.5)
-top = 35
+top = 3.
 bottom = 0.
 ax1.set_ylim(bottom, top)
-xtickNames = plt.setp(ax1, xticklabels=['MLP on MNIST 3vs5' , 'MLP on MNIST 4vs9'])
+xtickNames = plt.setp(ax1, xticklabels=['MLP on MNIST 3vs5' , 'MLP on MNIST 4vs9', 'SMO on MNIST 4vs9'])
 plt.setp(xtickNames, rotation=45, fontsize=8)
 
 # Due to the Y-axis scale being different across samples, it can be
@@ -176,18 +174,14 @@ for tick,label in zip(range(numBoxes),ax1.get_xticklabels()):
         horizontalalignment='center', size='x-small', weight=weights[k],
         color=boxColors[k])
         
-        
-# Finally, add a basic legend
-plt.figtext(0.80, 0.08, 'MLP' ,
-           backgroundcolor=boxColors[0], color='black', weight='roman',
-           size='x-small')
-plt.figtext(0.80, 0.045, 'SMO',
-backgroundcolor=boxColors[1],
-           color='white', weight='roman', size='x-small')
 plt.figtext(0.80, 0.015, '*', color='white', backgroundcolor='silver',
            weight='roman', size='medium')
 plt.figtext(0.815, 0.013, ' Average Value', color='black', weight='roman',
            size='x-small')
            
-plt.show()
+#save/show           
+filename = OPATH+'/comparaisonMistakes'
+#plt.show()
+plt.savefig(filename+'.pdf')
+plt.close()
 

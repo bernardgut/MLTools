@@ -20,8 +20,8 @@ if not os.path.exists(PATH):
     os.makedirs(PATH)
 
 def multiRunOptimal():
-    X=np.load('mnist/n_MNIST_Test35.npy')
-    L=np.load('mnist/n_MNIST_Test_labels35.npy')
+    X=np.load('mnist/n_MNIST_Test49.npy')
+    L=np.load('mnist/n_MNIST_Test_labels49.npy')
     
     Error = list()
     Mistakes = list()
@@ -30,20 +30,20 @@ def multiRunOptimal():
     for i in range(0,20) :
         print 'Begin iteration ',i
         W = mlp.run(50,0.05,0.2,i)
-        #(E, M) = mlp.test(X,L,W)
+        (E, M) = mlp.test(X,L,W)
         
-        #Error.append(E)
-        #Mistakes.append(M)
+        Error.append(E)
+        Mistakes.append(M)
         
         e=e+1
-        #print 'test error :\t',E
-        #print 'test mistakes :\t',M
+        print 'test error :\t',E
+        print 'test mistakes :\t',M
     
     #save
-    #print 'Saving Error trace : ', Error
-    #print 'Saving Mistakes trace : ',Mistakes
-    #np.save(PATH+'/result_E2',np.asarray(Error))
-    #np.save(PATH+'/result_M2',np.asarray(Mistakes)) 
+    print 'Saving Error trace : ', Error
+    print 'Saving Mistakes trace : ',Mistakes
+    np.save(PATH+'/result_E5',np.asarray(Error))
+    np.save(PATH+'/result_M5',np.asarray(Mistakes)) 
 
 def affineSearch():
     e = 0
