@@ -329,7 +329,7 @@ def run(_h1=50, _eta=0.05, _mu=0.2,run=0, debug=0) :
     print 'best validation error : ', E_min,' ; with training mistakes : ', missed_min
     
     directory='h'+str(h1)+'R'+str(rho)+'M'+str(mu)
-    directory='results/mlp/'+directory
+    directory='../results/mlp/'+directory
     if not os.path.exists(directory):
         os.makedirs(directory)
         
